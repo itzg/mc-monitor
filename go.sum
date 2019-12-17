@@ -1,3 +1,5 @@
+github.com/Raqbit/mc-pinger v0.0.0-20190414124050-6c3fd84faaa1 h1:s2UZugpc4wHQMBYoUI6wi2HE9ZR3TI8pmJrZpNhVFvU=
+github.com/Raqbit/mc-pinger v0.0.0-20190414124050-6c3fd84faaa1/go.mod h1:r2rVvqOwaYCU3rYUNeSmCiJbcX2wJkDisXH7rZsjjuM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334 h1:VHgatEHNcBFEB7inlalqfNqw65aNkM1lGX2yt3NmbS8=
 github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334/go.mod h1:SK73tn/9oHe+/Y0h39VT4UCxmurVJkR5NA7kMEAOgSE=
