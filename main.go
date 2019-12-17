@@ -9,8 +9,8 @@ import (
 )
 
 var config struct {
-	Host   string `default:"localhost" usage:"hostname of the Minecraft server"`
-	Port   int    `default:"25565" usage:"port of the Minecraft server"`
+	Host   string `default:"localhost" usage:"hostname of the Minecraft server" env:"MC_HOST"`
+	Port   int    `default:"25565" usage:"port of the Minecraft server" env:"MC_PORT"`
 	Gather struct {
 		Interval        time.Duration `default:"1m" usage:"when gather endpoint configured, gathers and sends at this interval"`
 		TelegrafAddress string        `usage:"[host:port] of telegraf accepting Influx line protocol"`
@@ -33,7 +33,7 @@ const (
 )
 
 func main() {
-	err := flagsfiller.Parse(&config)
+	err := flagsfiller.Parse(&config, flagsfiller.WithEnv(""))
 	if err != nil {
 		log.Fatal(err)
 	}
