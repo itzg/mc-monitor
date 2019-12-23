@@ -14,38 +14,32 @@ type TelegrafGatherer struct {
 	host             string
 	port             string
 	telegrafEndpoint string
+	pinger           mcpinger.Pinger
 }
 
 func NewTelegrafGatherer(host string, port int, telegrafEndpoint string) *TelegrafGatherer {
 	return &TelegrafGatherer{
 		host:             host,
 		port:             strconv.FormatInt(int64(port), 10),
+		pinger:           mcpinger.New(host, uint16(port)),
 		telegrafEndpoint: telegrafEndpoint,
 	}
 }
 
-func (g *TelegrafGatherer) Start(pinger mcpinger.Pinger, interval time.Duration) {
-	log.Printf("sending metrics to %s every %s", g.telegrafEndpoint, interval)
+func (g *TelegrafGatherer) Gather() {
+	startTime := time.Now()
+	info, err := g.pinger.Ping()
+	elapsed := time.Now().Sub(startTime)
 
-	ticker := time.NewTicker(config.Gather.Interval)
-	for {
-		select {
-		case <-ticker.C:
-			startTime := time.Now()
-			info, err := pinger.Ping()
-			elapsed := time.Now().Sub(startTime)
-
-			if err != nil {
-				err := g.sendFailedMetrics(err, elapsed)
-				if err != nil {
-					log.Printf("failed to send metrics: %s", err)
-				}
-			} else {
-				err := g.sendInfoMetrics(info, elapsed)
-				if err != nil {
-					log.Printf("failed to send metrics: %s", err)
-				}
-			}
+	if err != nil {
+		err := g.sendFailedMetrics(err, elapsed)
+		if err != nil {
+			log.Printf("failed to send metrics: %s", err)
+		}
+	} else {
+		err := g.sendInfoMetrics(info, elapsed)
+		if err != nil {
+			log.Printf("failed to send metrics: %s", err)
 		}
 	}
 }
@@ -59,6 +53,7 @@ func (g *TelegrafGatherer) sendInfoMetrics(info *mcpinger.ServerInfo, elapsed ti
 
 	m.AddField(FieldResponseTime, elapsed.Seconds())
 	m.AddField(FieldOnline, uint64(info.Players.Online))
+	m.AddField(FieldMax, uint64(info.Players.Max))
 
 	var buf bytes.Buffer
 	encoder := protocol.NewEncoder(&buf)

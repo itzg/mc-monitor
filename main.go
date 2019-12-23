@@ -1,56 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"github.com/Raqbit/mc-pinger"
-	"github.com/itzg/go-flagsfiller"
-	"log"
-	"time"
-)
-
-var config struct {
-	Host   string `default:"localhost" usage:"hostname of the Minecraft server" env:"MC_HOST"`
-	Port   int    `default:"25565" usage:"port of the Minecraft server" env:"MC_PORT"`
-	Gather struct {
-		Interval        time.Duration `default:"1m" usage:"when gather endpoint configured, gathers and sends at this interval"`
-		TelegrafAddress string        `usage:"[host:port] of telegraf accepting Influx line protocol"`
-	}
-}
-
-const (
-	MetricName = "minecraft_status"
-
-	TagHost   = "host"
-	TagPort   = "port"
-	TagStatus = "status"
-
-	FieldError        = "error"
-	FieldOnline       = "online"
-	FieldResponseTime = "response_time"
-
-	StatusError   = "error"
-	StatusSuccess = "success"
+	"context"
+	"flag"
+	"github.com/google/subcommands"
+	"os"
 )
 
 func main() {
-	err := flagsfiller.Parse(&config, flagsfiller.WithEnv(""))
-	if err != nil {
-		log.Fatal(err)
-	}
+	subcommands.Register(subcommands.HelpCommand(), "")
+	subcommands.Register(&statusCmd{}, "")
+	subcommands.Register(&gatherTelegrafCmd{}, "monitoring")
 
-	pinger := mcpinger.New(config.Host, uint16(config.Port))
+	flag.Parse()
 
-	if config.Gather.TelegrafAddress != "" {
-		gatherer := NewTelegrafGatherer(config.Host, config.Port, config.Gather.TelegrafAddress)
-		gatherer.Start(pinger, config.Gather.Interval)
-	} else {
-		// one shot
-		info, err := pinger.Ping()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Printf("version=%s online=%d max=%d motd='%s'",
-			info.Version.Name, info.Players.Online, info.Players.Max, info.Description.Text)
-	}
+	os.Exit(int(subcommands.Execute(context.Background())))
 }
