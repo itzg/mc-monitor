@@ -32,7 +32,7 @@ func (c *gatherTelegrafCmd) Usage() string {
 }
 
 func (c *gatherTelegrafCmd) SetFlags(flags *flag.FlagSet) {
-	filler := flagsfiller.New()
+	filler := flagsfiller.New(flagsfiller.WithEnv("Gather"))
 	err := filler.Fill(flags, c)
 	if err != nil {
 		log.Fatal(err)
