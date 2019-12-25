@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  telegraf:
+    image: telegraf:1.13
+    volumes:
+    - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  monitor:
+    image: itzg/mc-monitor
+    command: gather-for-telegraf
+    environment:
+      GATHER_INTERVAL: 10s
+      GATHER_TELEGRAF_ADDRESS: telegraf:8094
+      GATHER_SERVERS: mc.hypixel.net
