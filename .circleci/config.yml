@@ -1,0 +1,43 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@0.2.0
+
+workflows:
+  main:
+    jobs:
+      - test
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+  release:
+    jobs:
+      - test:
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*(-.*)*/
+      - release:
+
+jobs:
+  test:
+    executor:
+      name: go/default
+      tag: "1.13"
+    steps:
+      - checkout
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
+      - go/test
+  release:
+    executor:
+      name: go/default
+      tag: "1.13"
+    steps:
+      - checkout
+      - run: curl -sL https://git.io/goreleaser | bash

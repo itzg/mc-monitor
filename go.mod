@@ -1,4 +1,4 @@
-module github.com/itzg/go-mc-status
+module github.com/itzg/mc-monitor
 
 go 1.13
 
