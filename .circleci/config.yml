@@ -15,13 +15,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
-  release:
-    jobs:
-      - test:
-          filters:
-            tags:
-              ignore: /v[0-9]+(\.[0-9]+)*(-.*)*/
-      - release:
 
 jobs:
   test:
@@ -40,4 +33,5 @@ jobs:
       tag: "1.13"
     steps:
       - checkout
+      - go/load-cache
       - run: curl -sL https://git.io/goreleaser | bash
