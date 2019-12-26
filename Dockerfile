@@ -1,3 +1,3 @@
-FROM scratch
-COPY mc-monitor /
-ENTRYPOINT ["/mc-monitor"]
+FROM alpine:3.11
+COPY mc-monitor /usr/bin/
+ENTRYPOINT ["/usr/bin/mc-monitor"]
