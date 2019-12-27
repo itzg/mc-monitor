@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
+	"go.uber.org/zap"
 	"log"
 	"os"
 	"strconv"
@@ -17,6 +18,7 @@ type gatherTelegrafCmd struct {
 	Interval        time.Duration `default:"1m" usage:"gathers and sends metrics at this interval"`
 	Servers         []string      `usage:"one or more [host:port] addresses of servers to monitor"`
 	TelegrafAddress string        `default:"localhost:8094" usage:"[host:port] of telegraf accepting Influx line protocol"`
+	logger          *zap.Logger
 }
 
 func (c *gatherTelegrafCmd) Name() string {
@@ -51,7 +53,12 @@ func (c *gatherTelegrafCmd) Execute(ctx context.Context, f *flag.FlagSet, args .
 		return subcommands.ExitUsageError
 	}
 
-	fmt.Printf("monitoring %v at interval %s and reporting to %s\n", c.Servers, c.Interval, c.TelegrafAddress)
+	c.logger = args[0].(*zap.Logger).Named("gather")
+
+	c.logger.Info("starting monitoring",
+		zap.Strings("servers", c.Servers),
+		zap.Duration("interval", c.Interval),
+		zap.String("telegrafAddress", c.TelegrafAddress))
 
 	ticker := time.NewTicker(c.Interval)
 
@@ -80,10 +87,10 @@ func (c *gatherTelegrafCmd) createGatherers() []*TelegrafGatherer {
 			if err != nil {
 				log.Printf("WARN: unable to process %s: %s\n", addr, err)
 			} else {
-				gatherers = append(gatherers, NewTelegrafGatherer(parts[0], port, c.TelegrafAddress))
+				gatherers = append(gatherers, NewTelegrafGatherer(parts[0], port, c.TelegrafAddress, c.logger))
 			}
 		} else {
-			gatherers = append(gatherers, NewTelegrafGatherer(parts[0], DefaultPort, c.TelegrafAddress))
+			gatherers = append(gatherers, NewTelegrafGatherer(parts[0], DefaultPort, c.TelegrafAddress, c.logger))
 		}
 	}
 

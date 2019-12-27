@@ -4,6 +4,7 @@ import (
 	"bytes"
 	mcpinger "github.com/Raqbit/mc-pinger"
 	protocol "github.com/influxdata/line-protocol"
+	"go.uber.org/zap"
 	"log"
 	"net"
 	"strconv"
@@ -15,18 +16,21 @@ type TelegrafGatherer struct {
 	port             string
 	telegrafEndpoint string
 	pinger           mcpinger.Pinger
+	logger           *zap.Logger
 }
 
-func NewTelegrafGatherer(host string, port int, telegrafEndpoint string) *TelegrafGatherer {
+func NewTelegrafGatherer(host string, port int, telegrafEndpoint string, logger *zap.Logger) *TelegrafGatherer {
 	return &TelegrafGatherer{
 		host:             host,
 		port:             strconv.FormatInt(int64(port), 10),
 		pinger:           mcpinger.New(host, uint16(port)),
 		telegrafEndpoint: telegrafEndpoint,
+		logger:           logger,
 	}
 }
 
 func (g *TelegrafGatherer) Gather() {
+	g.logger.Debug("gathering", zap.String("host", g.host), zap.String("port", g.port))
 	startTime := time.Now()
 	info, err := g.pinger.Ping()
 	elapsed := time.Now().Sub(startTime)
@@ -96,6 +100,9 @@ func (g *TelegrafGatherer) sendFailedMetrics(err error, elapsed time.Duration) e
 }
 
 func (g *TelegrafGatherer) sendLine(lineBytes []byte) error {
+	g.logger.Debug("sending metrics",
+		zap.String("endpoint", g.telegrafEndpoint),
+		zap.ByteString("line", lineBytes))
 	conn, err := net.Dial("tcp", g.telegrafEndpoint)
 	if err != nil {
 		return err
