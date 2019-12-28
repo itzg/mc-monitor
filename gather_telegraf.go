@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
+	lpsender "github.com/itzg/line-protocol-sender"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -41,7 +42,7 @@ func (c *gatherTelegrafCmd) SetFlags(flags *flag.FlagSet) {
 	}
 }
 
-func (c *gatherTelegrafCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *gatherTelegrafCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 
 	if len(c.Servers) == 0 {
 		_, _ = fmt.Fprintln(os.Stderr, "requires at least one server")
@@ -62,7 +63,11 @@ func (c *gatherTelegrafCmd) Execute(ctx context.Context, f *flag.FlagSet, args .
 
 	ticker := time.NewTicker(c.Interval)
 
-	gatherers := c.createGatherers()
+	gatherers, err := c.createGatherers()
+	if err != nil {
+		c.logger.Error("failed to setup gatherers", zap.Error(err))
+		return subcommands.ExitFailure
+	}
 
 	for {
 		select {
@@ -77,8 +82,19 @@ func (c *gatherTelegrafCmd) Execute(ctx context.Context, f *flag.FlagSet, args .
 	}
 }
 
-func (c *gatherTelegrafCmd) createGatherers() []*TelegrafGatherer {
+func (c *gatherTelegrafCmd) createGatherers() ([]*TelegrafGatherer, error) {
 	gatherers := make([]*TelegrafGatherer, 0, len(c.Servers))
+
+	lpClient, err := lpsender.NewClient(context.Background(), lpsender.Config{
+		Endpoint:  c.TelegrafAddress,
+		BatchSize: len(c.Servers),
+		ErrorListener: func(err error) {
+			c.logger.Error("failed to send metrics", zap.Error(err))
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	for _, addr := range c.Servers {
 		parts := strings.SplitN(addr, ":", 2)
@@ -87,12 +103,12 @@ func (c *gatherTelegrafCmd) createGatherers() []*TelegrafGatherer {
 			if err != nil {
 				log.Printf("WARN: unable to process %s: %s\n", addr, err)
 			} else {
-				gatherers = append(gatherers, NewTelegrafGatherer(parts[0], port, c.TelegrafAddress, c.logger))
+				gatherers = append(gatherers, NewTelegrafGatherer(parts[0], port, lpClient, c.logger))
 			}
 		} else {
-			gatherers = append(gatherers, NewTelegrafGatherer(parts[0], DefaultPort, c.TelegrafAddress, c.logger))
+			gatherers = append(gatherers, NewTelegrafGatherer(parts[0], DefaultPort, lpClient, c.logger))
 		}
 	}
 
-	return gatherers
+	return gatherers, nil
 }

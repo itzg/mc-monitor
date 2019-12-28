@@ -3,6 +3,8 @@ version: '3'
 services:
   telegraf:
     image: telegraf:1.13
+    ports:
+    - 8094:8094
     volumes:
     - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
   monitor:
