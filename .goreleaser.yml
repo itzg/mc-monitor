@@ -16,12 +16,10 @@ builds:
     - 6
     - 7
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  -
+    format_overrides:
+      - goos: windows
+        format: zip
 dockers:
   - image_templates:
       - itzg/mc-monitor:latest
