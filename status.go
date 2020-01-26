@@ -45,6 +45,14 @@ func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interf
 		return subcommands.ExitFailure
 	}
 
+	// While server is starting up it will answer pings, but respond with empty JSON object.
+	// As such, we'll sanity check the max players value to see if a zero-value has been
+	// provided for info.
+	if info.Players.Max == 0 {
+		_, _ = fmt.Fprintf(os.Stderr, "server not ready %s:%d", c.Host, c.Port)
+		return subcommands.ExitFailure
+	}
+
 	fmt.Printf("%s:%d : version=%s online=%d max=%d motd='%s'",
 		c.Host, c.Port,
 		info.Version.Name, info.Players.Online, info.Players.Max, info.Description.Text)

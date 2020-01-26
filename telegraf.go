@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	mcpinger "github.com/Raqbit/mc-pinger"
 	lpsender "github.com/itzg/line-protocol-sender"
 	"go.uber.org/zap"
@@ -34,10 +35,9 @@ func (g *TelegrafGatherer) Gather() {
 	elapsed := time.Now().Sub(startTime)
 
 	if err != nil {
-		err := g.sendFailedMetrics(err, elapsed)
-		if err != nil {
-			log.Printf("failed to send metrics: %s", err)
-		}
+		g.sendFailedMetrics(err, elapsed)
+	} else if info.Players.Max == 0 {
+		g.sendFailedMetrics(errors.New("server not ready"), elapsed)
 	} else {
 		err := g.sendInfoMetrics(info, elapsed)
 		if err != nil {
@@ -62,7 +62,7 @@ func (g *TelegrafGatherer) sendInfoMetrics(info *mcpinger.ServerInfo, elapsed ti
 	return nil
 }
 
-func (g *TelegrafGatherer) sendFailedMetrics(err error, elapsed time.Duration) error {
+func (g *TelegrafGatherer) sendFailedMetrics(err error, elapsed time.Duration) {
 	m := lpsender.NewSimpleMetric(MetricName)
 
 	m.AddTag(TagHost, g.host)
@@ -74,5 +74,5 @@ func (g *TelegrafGatherer) sendFailedMetrics(err error, elapsed time.Duration) e
 
 	g.lpClient.Send(m)
 
-	return nil
+	return
 }
