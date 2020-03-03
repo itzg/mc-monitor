@@ -15,19 +15,32 @@ go get github.com/itzg/go-mc-status
 
 ```
 Subcommands:
+	flags            describe all known top-level flags
 	help             describe subcommands and their syntax
-	status           Retrieves and displays the status of the given Minecraft server
+	version          Show version and exit
 
 Subcommands for monitoring:
 	gather-for-telegraf  Periodically gathers to status of one or more Minecraft servers and sends metrics to telegraf over TCP using Influx line protocol
+
+Subcommands for status:
+	status           Retrieves and displays the status of the given Minecraft server
+	status-bedrock   Retrieves and displays the status of the given Minecraft Bedrock Dedicated server
 ```
 
 ## Examples
 
 ### Checking the status of a server
 
+To check the status of a Java edition server:
+
 ```
-docker run -ti --rm itzg/mc-monitor status --host mc.hypixel.net
+docker run -it --rm itzg/mc-monitor status --host mc.hypixel.net
+```
+
+To check the status of a Bedrock Dedicated server:
+
+```
+docker run -it --rm itzg/mc-monitor status-bedrock --host play.fallentech.io
 ```
 
 where exit code will be 0 for success or 1 for failure.

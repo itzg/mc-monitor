@@ -22,7 +22,8 @@ func main() {
 	subcommands.Register(subcommands.HelpCommand(), "")
 	subcommands.Register(subcommands.FlagsCommand(), "")
 	subcommands.Register(&versionCmd{}, "")
-	subcommands.Register(&statusCmd{}, "")
+	subcommands.Register(&statusCmd{}, "status")
+	subcommands.Register(&statusBedrockCmd{}, "status")
 	subcommands.Register(&gatherTelegrafCmd{}, "monitoring")
 
 	var config GlobalConfig
