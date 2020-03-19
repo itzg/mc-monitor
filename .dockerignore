@@ -1,0 +1,8 @@
+Dockerfile*
+.git/**
+dist/**
+.goreleaser.yml
+.circleci
+examples/**
+docs/**
+README*

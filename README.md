@@ -20,6 +20,7 @@ Subcommands:
 	version          Show version and exit
 
 Subcommands for monitoring:
+	export-for-prometheus  Registers an HTTP metrics endpoints for Prometheus export
 	gather-for-telegraf  Periodically gathers to status of one or more Minecraft servers and sends metrics to telegraf over TCP using Influx line protocol
 
 Subcommands for status:
@@ -45,7 +46,7 @@ docker run -it --rm itzg/mc-monitor status-bedrock --host play.fallentech.io
 
 where exit code will be 0 for success or 1 for failure.
 
-### Monitoring a server
+### Monitoring a server with Telegraf
 
 > The following example is provided in [examples/mc-monitor-telegraf](examples/mc-monitor-telegraf)
 
@@ -85,3 +86,21 @@ minecraft_status,host=mc.hypixel.net,port=25565,status=success response_time=0.1
 minecraft_status,host=mc.hypixel.net,port=25565,status=success response_time=0.239236074,online=51198i,max=90000i 1576971579020125479
 minecraft_status,host=mc.hypixel.net,port=25565,status=success response_time=0.225942383,online=51198i,max=90000i 1576971589006821324
 ```
+
+### Monitoring a server with Prometheus
+
+When using the `export-for-prometheus` subcommand, mc-monitor will serve a Prometheus exporter that collects the Minecraft server metrics during each scrape of the path `/metrics`.
+
+Labels
+- `server_host`
+- `server_port`
+- `server_edition` : `java` or `bedrock`
+Metrics
+- `minecraft_status_healthy`
+- `minecraft_status_response_time_seconds`
+- `minecraft_status_players_online_count`
+- `minecraft_status_players_max_count`
+
+An example Docker composition is provided in [examples/mc-monitor-prom](examples/mc-monitor-prom), which was used to grab the following screenshot:
+
+![Prometheus Chart](docs/prometheus_online_count_chart.png)

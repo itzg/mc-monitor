@@ -8,7 +8,8 @@ services:
     volumes:
     - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
   monitor:
-    image: itzg/mc-monitor
+    build:
+      context: ../..
     command: gather-for-telegraf
     environment:
       GATHER_INTERVAL: 10s

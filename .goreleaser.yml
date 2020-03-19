@@ -24,6 +24,7 @@ dockers:
   - image_templates:
       - itzg/mc-monitor:latest
       - itzg/mc-monitor:{{ .Tag }}
+    dockerfile: Dockerfile.release
 checksum:
   name_template: 'checksums.txt'
 snapshot:

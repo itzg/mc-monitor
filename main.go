@@ -25,6 +25,7 @@ func main() {
 	subcommands.Register(&statusCmd{}, "status")
 	subcommands.Register(&statusBedrockCmd{}, "status")
 	subcommands.Register(&gatherTelegrafCmd{}, "monitoring")
+	subcommands.Register(&exportPrometheusCmd{}, "monitoring")
 
 	var config GlobalConfig
 	err := flagsfiller.Parse(&config, flagsfiller.WithEnv(""))

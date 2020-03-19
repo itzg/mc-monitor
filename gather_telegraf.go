@@ -10,8 +10,6 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -34,9 +32,9 @@ func (c *gatherTelegrafCmd) Usage() string {
 	return ""
 }
 
-func (c *gatherTelegrafCmd) SetFlags(flags *flag.FlagSet) {
+func (c *gatherTelegrafCmd) SetFlags(f *flag.FlagSet) {
 	filler := flagsfiller.New(flagsfiller.WithEnv("Gather"))
-	err := filler.Fill(flags, c)
+	err := filler.Fill(f, c)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,17 +95,11 @@ func (c *gatherTelegrafCmd) createGatherers() ([]*TelegrafGatherer, error) {
 	}
 
 	for _, addr := range c.Servers {
-		parts := strings.SplitN(addr, ":", 2)
-		if len(parts) == 2 {
-			port, err := strconv.Atoi(parts[1])
-			if err != nil {
-				log.Printf("WARN: unable to process %s: %s\n", addr, err)
-			} else {
-				gatherers = append(gatherers, NewTelegrafGatherer(parts[0], port, lpClient, c.logger))
-			}
-		} else {
-			gatherers = append(gatherers, NewTelegrafGatherer(parts[0], DefaultPort, lpClient, c.logger))
+		host, port, err := SplitHostPort(addr, DefaultJavaPort)
+		if err != nil {
+			return nil, err
 		}
+		gatherers = append(gatherers, NewTelegrafGatherer(host, port, lpClient, c.logger))
 	}
 
 	return gatherers, nil

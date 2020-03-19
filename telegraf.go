@@ -18,7 +18,7 @@ type TelegrafGatherer struct {
 	lpClient lpsender.Client
 }
 
-func NewTelegrafGatherer(host string, port int, lpClient lpsender.Client, logger *zap.Logger) *TelegrafGatherer {
+func NewTelegrafGatherer(host string, port uint16, lpClient lpsender.Client, logger *zap.Logger) *TelegrafGatherer {
 	return &TelegrafGatherer{
 		host:     host,
 		port:     strconv.FormatInt(int64(port), 10),

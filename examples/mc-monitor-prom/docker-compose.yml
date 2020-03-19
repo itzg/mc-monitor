@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  prom:
+    image: prom/prometheus
+    ports:
+    - 9090:9090
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - monitor
+  monitor:
+    build:
+      context: ../..
+    command: export-for-prometheus
+    environment:
+      EXPORT_SERVERS: 127.0.0.1,mc.hypixel.net,play.cubecraft.net
+      DEBUG: "true"
