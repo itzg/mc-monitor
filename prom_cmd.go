@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
 	"github.com/prometheus/client_golang/prometheus"
@@ -11,17 +10,16 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
 const promExportPath = "/metrics"
 
 type exportPrometheusCmd struct {
-	Servers    []string `usage:"one or more [host:port] addresses of servers to monitor"`
-	ExportPort int      `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
-	Edition    string   `usage:"The type of Minecraft server, java or bedrock" default:"java"`
-	logger     *zap.Logger
+	Servers []string `usage:"one or more [host:port] addresses of servers to monitor, when port is omitted 19132 is used"`
+	Port    int      `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	Edition string   `usage:"The edition of Minecraft server, java or bedrock" default:"java"`
+	logger  *zap.Logger
 }
 
 func (c *exportPrometheusCmd) Name() string {
@@ -46,11 +44,11 @@ func (c *exportPrometheusCmd) SetFlags(f *flag.FlagSet) {
 
 func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 	if len(c.Servers) == 0 {
-		_, _ = fmt.Fprintln(os.Stderr, "requires at least one server")
+		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
 	}
 	if !ValidEdition(c.Edition) {
-		_, _ = fmt.Fprintln(os.Stderr, "invalid edition")
+		printUsageError("invalid edition")
 		return subcommands.ExitUsageError
 	}
 
@@ -66,7 +64,7 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 		log.Fatal(err)
 	}
 
-	exportAddress := ":" + strconv.Itoa(c.ExportPort)
+	exportAddress := ":" + strconv.Itoa(c.Port)
 
 	logger.Info("exporting metrics for prometheus",
 		zap.String("address", exportAddress),

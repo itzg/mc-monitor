@@ -5,6 +5,7 @@ import (
 	mcpinger "github.com/Raqbit/mc-pinger"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
+	"net"
 	"strconv"
 	"time"
 )
@@ -61,12 +62,20 @@ func newPromCollectors(servers []string, edition ServerEdition, logger *zap.Logg
 func createPromCollectors(servers []string, edition ServerEdition, logger *zap.Logger) (collectors []specificPromCollector, err error) {
 	for _, server := range servers {
 		switch edition {
+
 		case JavaEdition:
 			host, port, err := SplitHostPort(server, DefaultJavaPort)
 			if err != nil {
 				return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
 			}
 			collectors = append(collectors, newPromJavaCollector(host, port, logger))
+
+		case BedrockEdition:
+			host, port, err := SplitHostPort(server, DefaultBedrockPort)
+			if err != nil {
+				return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
+			}
+			collectors = append(collectors, newPromBedrockCollector(host, port, logger))
 		}
 	}
 	return
@@ -110,6 +119,40 @@ func (c *promJavaCollector) Collect(metrics chan<- prometheus.Metric) {
 }
 
 func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc, value float64) {
+	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
+		c.host, c.port, string(JavaEdition))
+	if err != nil {
+		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
+	} else {
+		metrics <- metric
+	}
+}
+
+type promBedrockCollector struct {
+	host   string
+	port   string
+	logger *zap.Logger
+}
+
+func newPromBedrockCollector(host string, port uint16, logger *zap.Logger) *promBedrockCollector {
+	return &promBedrockCollector{host: host, port: strconv.Itoa(int(port)), logger: logger}
+}
+
+func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
+	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", c.port))
+
+	info, err := PingBedrockServer(net.JoinHostPort(c.host, c.port))
+	if err != nil {
+		c.sendMetric(metrics, promDescHealthy, 0)
+	} else {
+		c.sendMetric(metrics, promDescResponseTime, info.Rtt.Seconds())
+		c.sendMetric(metrics, promDescHealthy, 1)
+		c.sendMetric(metrics, promDescPlayersOnline, float64(info.Players))
+		c.sendMetric(metrics, promDescPlayersMax, float64(info.MaxPlayers))
+	}
+}
+
+func (c *promBedrockCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc, value float64) {
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
 		c.host, c.port, string(JavaEdition))
 	if err != nil {

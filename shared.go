@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 const (
 	DefaultJavaPort    uint16 = 25565
 	DefaultBedrockPort uint16 = 19132
@@ -18,4 +23,8 @@ func ValidEdition(v string) bool {
 		return true
 	}
 	return false
+}
+
+func printUsageError(msg string) {
+	_, _ = fmt.Fprintln(os.Stderr, msg)
 }

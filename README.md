@@ -89,18 +89,30 @@ minecraft_status,host=mc.hypixel.net,port=25565,status=success response_time=0.2
 
 ### Monitoring a server with Prometheus
 
-When using the `export-for-prometheus` subcommand, mc-monitor will serve a Prometheus exporter that collects the Minecraft server metrics during each scrape of the path `/metrics`.
+When using the `export-for-prometheus` subcommand, mc-monitor will serve a Prometheus exporter on port 8080, by default, that collects Minecraft server metrics during each scrape of `/metrics`.
 
-Labels
-- `server_host`
-- `server_port`
-- `server_edition` : `java` or `bedrock`
-Metrics
+The sub-command accepts the following arguments, which can also be viewed using `--help`:
+```
+  -edition string
+    	The edition of Minecraft server, java or bedrock (env EXPORT_EDITION) (default "java")
+  -port int
+    	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
+  -servers host:port
+    	one or more host:port addresses of servers to monitor, when port is omitted 19132 is used (env EXPORT_SERVERS)
+```
+
+The following metrics are exported
 - `minecraft_status_healthy`
 - `minecraft_status_response_time_seconds`
 - `minecraft_status_players_online_count`
 - `minecraft_status_players_max_count`
 
+with the labels
+- `server_host`
+- `server_port`
+- `server_edition` : `java` or `bedrock`
+
 An example Docker composition is provided in [examples/mc-monitor-prom](examples/mc-monitor-prom), which was used to grab the following screenshot:
 
 ![Prometheus Chart](docs/prometheus_online_count_chart.png)
+
