@@ -8,9 +8,7 @@ require (
 	github.com/itzg/go-flagsfiller v1.4.1
 	github.com/itzg/line-protocol-sender v0.1.1
 	github.com/itzg/zapconfigs v0.1.0
-	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/prometheus/client_golang v1.5.1
 	github.com/sandertv/go-raknet v1.6.6
-	github.com/sandertv/gophertunnel v1.3.16
 	go.uber.org/zap v1.13.0
 )
