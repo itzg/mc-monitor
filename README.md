@@ -1,7 +1,7 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/itzg/mc-monitor)](https://hub.docker.com/r/itzg/mc-monitor)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/itzg/mc-monitor)](https://github.com/itzg/mc-monitor/releases/latest)
-[![CircleCI](https://circleci.com/gh/itzg/mc-monitor.svg?style=svg)](https://app.circleci.com/github/itzg/mc-monitor/pipelines)
+[![CircleCI](https://circleci.com/gh/itzg/mc-monitor.svg?style=svg)](https://app.circleci.com/pipelines/github/itzg/mc-monitor)
 
 Command/agent to monitor the status of Minecraft servers
 
