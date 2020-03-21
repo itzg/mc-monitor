@@ -16,10 +16,10 @@ import (
 const promExportPath = "/metrics"
 
 type exportPrometheusCmd struct {
-	Servers []string `usage:"one or more [host:port] addresses of servers to monitor, when port is omitted 19132 is used"`
-	Port    int      `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
-	Edition string   `usage:"The edition of Minecraft server, java or bedrock" default:"java"`
-	logger  *zap.Logger
+	Servers        []string `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
+	BedrockServers []string `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
+	Port           int      `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	logger         *zap.Logger
 }
 
 func (c *exportPrometheusCmd) Name() string {
@@ -47,14 +47,10 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
 	}
-	if !ValidEdition(c.Edition) {
-		printUsageError("invalid edition")
-		return subcommands.ExitUsageError
-	}
 
 	logger := args[0].(*zap.Logger)
 
-	collectors, err := newPromCollectors(c.Servers, ServerEdition(c.Edition), logger)
+	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +65,7 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 	logger.Info("exporting metrics for prometheus",
 		zap.String("address", exportAddress),
 		zap.String("path", promExportPath),
-		zap.Strings("servers", c.Servers))
+	)
 
 	http.Handle(promExportPath, promhttp.Handler())
 	log.Fatal(http.ListenAndServe(exportAddress, nil))

@@ -50,11 +50,20 @@ func (c promCollectors) Collect(metrics chan<- prometheus.Metric) {
 	}
 }
 
-func newPromCollectors(servers []string, edition ServerEdition, logger *zap.Logger) (promCollectors, error) {
-	collectors, err := createPromCollectors(servers, edition, logger)
+func newPromCollectors(servers []string, bedrockServers []string, logger *zap.Logger) (promCollectors, error) {
+	var collectors []specificPromCollector
+
+	javaCollectors, err := createPromCollectors(servers, JavaEdition, logger)
 	if err != nil {
 		return nil, err
 	}
+	collectors = append(collectors, javaCollectors...)
+
+	bedrockCollectors, err := createPromCollectors(bedrockServers, BedrockEdition, logger)
+	if err != nil {
+		return nil, err
+	}
+	collectors = append(collectors, bedrockCollectors...)
 
 	return collectors, nil
 }
@@ -154,7 +163,7 @@ func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 
 func (c *promBedrockCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc, value float64) {
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
-		c.host, c.port, string(JavaEdition))
+		c.host, c.port, string(BedrockEdition))
 	if err != nil {
 		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
 	} else {

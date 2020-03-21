@@ -93,12 +93,12 @@ When using the `export-for-prometheus` subcommand, mc-monitor will serve a Prome
 
 The sub-command accepts the following arguments, which can also be viewed using `--help`:
 ```
-  -edition string
-    	The edition of Minecraft server, java or bedrock (env EXPORT_EDITION) (default "java")
+  -bedrock-servers host:port
+    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
   -port int
     	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
   -servers host:port
-    	one or more host:port addresses of servers to monitor, when port is omitted 19132 is used (env EXPORT_SERVERS)
+    	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
 ```
 
 The following metrics are exported
