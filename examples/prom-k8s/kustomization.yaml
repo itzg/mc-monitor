@@ -1,0 +1,12 @@
+resources:
+  - prom.yaml
+  - mc-monitor.yaml
+  - grafana.yaml
+
+configMapGenerator:
+  - name: prom-config
+    files:
+      - configs/prometheus.yml
+  - name: grafana-datasources
+    files:
+      - configs/ds-prom.yaml
