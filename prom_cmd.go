@@ -43,7 +43,7 @@ func (c *exportPrometheusCmd) SetFlags(f *flag.FlagSet) {
 }
 
 func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	if len(c.Servers) == 0 {
+	if (len(c.Servers) + len(c.BedrockServers)) == 0 {
 		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
 	}
