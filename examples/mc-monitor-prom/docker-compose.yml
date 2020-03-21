@@ -15,4 +15,5 @@ services:
     command: export-for-prometheus
     environment:
       EXPORT_SERVERS: 127.0.0.1,mc.hypixel.net,play.cubecraft.net
+      EXPORT_BEDROCK_SERVERS: play.fallentech.io
       DEBUG: "true"

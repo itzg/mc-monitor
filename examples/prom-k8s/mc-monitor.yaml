@@ -14,13 +14,15 @@ spec:
         app: mc-monitor
     spec:
       containers:
-        - name: mc-monitor
-          image: itzg/mc-monitor:0.3.1
+        - name: main
+          image: itzg/mc-monitor:0.4.0
           env:
             - name: DEBUG
               value: "true"
             - name: EXPORT_SERVERS
               value: mc.hypixel.net,play.cubecraft.net
+            - name: EXPORT_BEDROCK_SERVERS
+              value: play.fallentech.io
           args:
             - export-for-prometheus
       restartPolicy: Always
