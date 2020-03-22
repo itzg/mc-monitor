@@ -111,6 +111,7 @@ with the labels
 - `server_host`
 - `server_port`
 - `server_edition` : `java` or `bedrock`
+- `server_version`
 
 An example Docker composition is provided in [examples/mc-monitor-prom](examples/mc-monitor-prom), which was used to grab the following screenshot:
 

@@ -14,21 +14,23 @@ const (
 	promLabelHost    = "server_host"
 	promLabelPort    = "server_port"
 	promLabelEdition = "server_edition"
+	promLabelVersion = "server_version"
 )
 
 var (
-	promDescHealthy = prometheus.NewDesc("minecraft_status_healthy",
+	promVariableLabels = []string{promLabelHost, promLabelPort, promLabelEdition, promLabelVersion}
+	promDescHealthy    = prometheus.NewDesc("minecraft_status_healthy",
 		"Indicates if the server is healthy (1) or not (0)",
-		[]string{promLabelHost, promLabelPort, promLabelEdition}, nil)
+		promVariableLabels, nil)
 	promDescResponseTime = prometheus.NewDesc("minecraft_status_response_time_seconds",
 		"Amount of time it took for server to respond",
-		[]string{promLabelHost, promLabelPort, promLabelEdition}, nil)
+		promVariableLabels, nil)
 	promDescPlayersOnline = prometheus.NewDesc("minecraft_status_players_online_count",
 		"Number of players currently online",
-		[]string{promLabelHost, promLabelPort, promLabelEdition}, nil)
+		promVariableLabels, nil)
 	promDescPlayersMax = prometheus.NewDesc("minecraft_status_players_max_count",
 		"Maximum number of players allowed by the server",
-		[]string{promLabelHost, promLabelPort, promLabelEdition}, nil)
+		promVariableLabels, nil)
 )
 
 type specificPromCollector interface {
@@ -113,23 +115,25 @@ func (c *promJavaCollector) Collect(metrics chan<- prometheus.Metric) {
 	elapsed := time.Now().Sub(startTime)
 
 	if err != nil {
-		c.sendMetric(metrics, promDescHealthy, 0)
+		c.sendMetric(metrics, promDescHealthy, "", 0)
 	} else {
-		c.sendMetric(metrics, promDescResponseTime, elapsed.Seconds())
+		c.sendMetric(metrics, promDescResponseTime, info.Version.Name, elapsed.Seconds())
 		if info.Players.Max == 0 { // when server responds to ping but is not fully ready
-			c.sendMetric(metrics, promDescHealthy, 0)
+			c.sendMetric(metrics, promDescHealthy, info.Version.Name, 0)
 		} else {
-			c.sendMetric(metrics, promDescHealthy, 1)
-			c.sendMetric(metrics, promDescPlayersOnline, float64(info.Players.Online))
-			c.sendMetric(metrics, promDescPlayersMax, float64(info.Players.Max))
+			c.sendMetric(metrics, promDescHealthy, info.Version.Name, 1)
+			c.sendMetric(metrics, promDescPlayersOnline, info.Version.Name, float64(info.Players.Online))
+			c.sendMetric(metrics, promDescPlayersMax, info.Version.Name, float64(info.Players.Max))
 		}
 
 	}
 }
 
-func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc, value float64) {
+func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc,
+	version string, value float64) {
+
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
-		c.host, c.port, string(JavaEdition))
+		c.host, c.port, string(JavaEdition), version)
 	if err != nil {
 		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
 	} else {
@@ -152,18 +156,20 @@ func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 
 	info, err := PingBedrockServer(net.JoinHostPort(c.host, c.port))
 	if err != nil {
-		c.sendMetric(metrics, promDescHealthy, 0)
+		c.sendMetric(metrics, promDescHealthy, info.Version, 0)
 	} else {
-		c.sendMetric(metrics, promDescResponseTime, info.Rtt.Seconds())
-		c.sendMetric(metrics, promDescHealthy, 1)
-		c.sendMetric(metrics, promDescPlayersOnline, float64(info.Players))
-		c.sendMetric(metrics, promDescPlayersMax, float64(info.MaxPlayers))
+		c.sendMetric(metrics, promDescResponseTime, info.Version, info.Rtt.Seconds())
+		c.sendMetric(metrics, promDescHealthy, info.Version, 1)
+		c.sendMetric(metrics, promDescPlayersOnline, info.Version, float64(info.Players))
+		c.sendMetric(metrics, promDescPlayersMax, info.Version, float64(info.MaxPlayers))
 	}
 }
 
-func (c *promBedrockCollector) sendMetric(metrics chan<- prometheus.Metric, desc *prometheus.Desc, value float64) {
+func (c *promBedrockCollector) sendMetric(metrics chan<- prometheus.Metric,
+	desc *prometheus.Desc, version string, value float64) {
+
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
-		c.host, c.port, string(BedrockEdition))
+		c.host, c.port, string(BedrockEdition), version)
 	if err != nil {
 		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
 	} else {
