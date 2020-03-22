@@ -13,9 +13,10 @@ import (
 const (
 	MetricName = "minecraft_status"
 
-	TagHost   = "host"
-	TagPort   = "port"
-	TagStatus = "status"
+	TagHost    = "host"
+	TagPort    = "port"
+	TagStatus  = "status"
+	TagVersion = "version"
 
 	FieldError        = "error"
 	FieldOnline       = "online"
@@ -68,6 +69,7 @@ func (g *TelegrafGatherer) sendInfoMetrics(info *mcpinger.ServerInfo, elapsed ti
 	m.AddTag(TagHost, g.host)
 	m.AddTag(TagPort, g.port)
 	m.AddTag(TagStatus, StatusSuccess)
+	m.AddTag(TagVersion, info.Version.Name)
 
 	m.AddField(FieldResponseTime, elapsed.Seconds())
 	m.AddField(FieldOnline, uint64(info.Players.Online))
