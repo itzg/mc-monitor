@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: itzg/mc-monitor:0.4.1
+          image: itzg/mc-monitor
           env:
             - name: DEBUG
               value: "true"
