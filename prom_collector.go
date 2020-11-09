@@ -156,7 +156,7 @@ func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 
 	info, err := PingBedrockServer(net.JoinHostPort(c.host, c.port))
 	if err != nil {
-		c.sendMetric(metrics, promDescHealthy, info.Version, 0)
+		c.sendMetric(metrics, promDescHealthy, "", 0)
 	} else {
 		c.sendMetric(metrics, promDescResponseTime, info.Version, info.Rtt.Seconds())
 		c.sendMetric(metrics, promDescHealthy, info.Version, 1)
