@@ -1,5 +1,7 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/Herobone/mc-pinger v1.0.1 h1:hNZvpUJzio5azMmv/Czo9mpFz5x1dl6zRU8y8ylzcpk=
+github.com/Herobone/mc-pinger v1.0.1/go.mod h1:B2dDpBqQLKghiwqSSGVfUk/06KgtU20nzNFwvMVh9s8=
 github.com/Raqbit/mc-pinger v0.0.0-20191220212142-2843d3222bd5 h1:BpFQdgs2FL6mMOG699aODzkbAiC17l3NPXJeKlfZRqY=
 github.com/Raqbit/mc-pinger v0.0.0-20191220212142-2843d3222bd5/go.mod h1:r2rVvqOwaYCU3rYUNeSmCiJbcX2wJkDisXH7rZsjjuM=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

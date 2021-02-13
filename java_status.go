@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	mcpinger "github.com/Raqbit/mc-pinger"
+	mcpinger "github.com/Herobone/mc-pinger"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
 )
