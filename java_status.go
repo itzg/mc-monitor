@@ -4,12 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Raqbit/mc-pinger"
-	"github.com/google/subcommands"
-	"github.com/itzg/go-flagsfiller"
 	"log"
 	"os"
 	"time"
+
+	mcpinger "github.com/Raqbit/mc-pinger"
+	"github.com/google/subcommands"
+	"github.com/itzg/go-flagsfiller"
 )
 
 type statusCmd struct {
@@ -18,6 +19,7 @@ type statusCmd struct {
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
+	TimeOut       time.Duration `usage:"if non-zero, this is the timeout the ping can take as a maximum"`
 }
 
 func (c *statusCmd) Name() string {
@@ -41,7 +43,12 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 }
 
 func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	pinger := mcpinger.New(c.Host, uint16(c.Port))
+	var pinger mcpinger.Pinger
+	if c.TimeOut > 0 {
+		pinger = mcpinger.NewTimed(c.Host, uint16(c.Port), c.TimeOut)
+	} else {
+		pinger = mcpinger.New(c.Host, uint16(c.Port))
+	}
 	if c.RetryInterval <= 0 {
 		c.RetryInterval = 1 * time.Second
 	}
