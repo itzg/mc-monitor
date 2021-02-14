@@ -37,7 +37,7 @@ func PingBedrockServer(address string) (*BedrockServerInfo, error) {
 		Players:         safeParseInt(parts[4]),
 		MaxPlayers:      safeParseInt(parts[5]),
 	}
-	if len(parts) > 6 {
+	if len(parts) > 7 {
 		info.LevelName = parts[7]
 		info.GameMode = parts[8]
 	}
