@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	mcpinger "github.com/Raqbit/mc-pinger"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 	"net"
 	"strconv"
 	"time"
-
-	mcpinger "github.com/Herobone/mc-pinger"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
 )
 
 const (

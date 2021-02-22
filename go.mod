@@ -3,8 +3,7 @@ module github.com/itzg/mc-monitor
 go 1.13
 
 require (
-	github.com/Herobone/mc-pinger v1.0.1
-	github.com/Raqbit/mc-pinger v0.0.0-20191220212142-2843d3222bd5 // indirect
+	github.com/Raqbit/mc-pinger v0.0.0-20191220212142-2843d3222bd5
 	github.com/google/subcommands v1.0.1
 	github.com/itzg/go-flagsfiller v1.4.1
 	github.com/itzg/line-protocol-sender v0.1.1

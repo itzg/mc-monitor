@@ -2,13 +2,12 @@ package main
 
 import (
 	"errors"
+	mcpinger "github.com/Raqbit/mc-pinger"
+	lpsender "github.com/itzg/line-protocol-sender"
+	"go.uber.org/zap"
 	"log"
 	"strconv"
 	"time"
-
-	mcpinger "github.com/Herobone/mc-pinger"
-	lpsender "github.com/itzg/line-protocol-sender"
-	"go.uber.org/zap"
 )
 
 const (
