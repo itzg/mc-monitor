@@ -43,12 +43,13 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 }
 
 func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	var pinger mcpinger.Pinger
 	if c.TimeOut > 0 {
-		pinger = mcpinger.NewTimed(c.Host, uint16(c.Port), c.TimeOut)
-	} else {
-		pinger = mcpinger.New(c.Host, uint16(c.Port))
+		newCTX, cancel := context.WithTimeout(ctx, c.TimeOut)
+		defer cancel()
+		ctx = newCTX
 	}
+	pinger := mcpinger.NewContext(ctx, c.Host, uint16(c.Port))
+
 	if c.RetryInterval <= 0 {
 		c.RetryInterval = 1 * time.Second
 	}
