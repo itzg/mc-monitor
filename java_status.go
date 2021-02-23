@@ -19,7 +19,7 @@ type statusCmd struct {
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
-	TimeOut       time.Duration `usage:"if non-zero, this is the timeout the ping can take as a maximum"`
+	Timeout       time.Duration `usage:"the timeout the ping can take as a maximum" default:"60s"`
 }
 
 func (c *statusCmd) Name() string {
