@@ -43,8 +43,8 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 }
 
 func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	if c.TimeOut > 0 {
-		newCTX, cancel := context.WithTimeout(ctx, c.TimeOut)
+	if c.Timeout > 0 {
+		newCTX, cancel := context.WithTimeout(ctx, c.Timeout)
 		defer cancel()
 		ctx = newCTX
 	}
