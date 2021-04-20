@@ -20,6 +20,9 @@ type statusCmd struct {
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
 	Timeout       time.Duration `usage:"the timeout the ping can take as a maximum" default:"60s"`
+
+	UseProxy     bool `usage:"supports contacting Bungeecord when proxy_protocol enabled"`
+	ProxyVersion byte `usage:"version of PROXY protocol to use" default:"1"`
 }
 
 func (c *statusCmd) Name() string {
@@ -43,12 +46,14 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 }
 
 func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+	options := []mcpinger.McPingerOption{}
 	if c.Timeout > 0 {
-		newCTX, cancel := context.WithTimeout(ctx, c.Timeout)
-		defer cancel()
-		ctx = newCTX
+		options = append(options, mcpinger.WithTimeout(c.Timeout))
 	}
-	pinger := mcpinger.NewContext(ctx, c.Host, uint16(c.Port))
+	if c.UseProxy {
+		options = append(options, mcpinger.WithProxyProto(c.ProxyVersion))
+	}
+	pinger := mcpinger.New(c.Host, uint16(c.Port), options...)
 
 	if c.RetryInterval <= 0 {
 		c.RetryInterval = 1 * time.Second
