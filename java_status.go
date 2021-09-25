@@ -23,6 +23,8 @@ type statusCmd struct {
 
 	UseProxy     bool `usage:"supports contacting Bungeecord when proxy_protocol enabled"`
 	ProxyVersion byte `usage:"version of PROXY protocol to use" default:"1"`
+
+	ShowPlayerCount bool `usage:"show just the online player count"`
 }
 
 func (c *statusCmd) Name() string {
@@ -45,8 +47,8 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 	}
 }
 
-func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	options := []mcpinger.McPingerOption{}
+func (c *statusCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
+	var options []mcpinger.McPingerOption
 	if c.Timeout > 0 {
 		options = append(options, mcpinger.WithTimeout(c.Timeout))
 	}
@@ -84,9 +86,13 @@ func (c *statusCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interf
 			return subcommands.ExitFailure
 		}
 
-		fmt.Printf("%s:%d : version=%s online=%d max=%d motd='%s'",
-			c.Host, c.Port,
-			info.Version.Name, info.Players.Online, info.Players.Max, info.Description.Text)
+		if c.ShowPlayerCount {
+			fmt.Printf("%d\n", info.Players.Online)
+		} else {
+			fmt.Printf("%s:%d : version=%s online=%d max=%d motd='%s'\n",
+				c.Host, c.Port,
+				info.Version.Name, info.Players.Online, info.Players.Max, info.Description.Text)
+		}
 
 		return subcommands.ExitSuccess
 	}
