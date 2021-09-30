@@ -13,7 +13,6 @@ builds:
     - arm
     - arm64
   goarm:
-    - 6
     - 7
 archives:
   -
