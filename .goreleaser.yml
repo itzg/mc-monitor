@@ -1,3 +1,4 @@
+project_name: mc-monitor
 before:
   hooks:
     - go mod download
@@ -21,9 +22,46 @@ archives:
         format: zip
 dockers:
   - image_templates:
-      - itzg/mc-monitor:latest
-      - itzg/mc-monitor:{{ .Tag }}
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-amd64
     dockerfile: Dockerfile.release
+    use: buildx
+    build_flag_templates:
+      - --platform
+      - linux/amd64
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - image_templates:
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm64
+    dockerfile: Dockerfile.release
+    goarch: arm64
+    use: buildx
+    build_flag_templates:
+      - --platform
+      - linux/arm64
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - image_templates:
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm32v7
+    dockerfile: Dockerfile.release
+    goarch: arm
+    goarm: "7"
+    use: buildx
+    build_flag_templates:
+      - --platform
+      - linux/arm/v7
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+docker_manifests:
+  - name_template:  itzg/{{ .ProjectName }}:{{ .Version }}
+    image_templates:
+      -  itzg/{{ .ProjectName }}:latest-amd64
+      -  itzg/{{ .ProjectName }}:latest-arm64
+      -  itzg/{{ .ProjectName }}:latest-arm32v7
+  - name_template:  itzg/{{ .ProjectName }}:latest
+    image_templates:
+      -  itzg/{{ .ProjectName }}:latest-amd64
+      -  itzg/{{ .ProjectName }}:latest-arm64
+      -  itzg/{{ .ProjectName }}:latest-arm32v7
 checksum:
   name_template: 'checksums.txt'
 snapshot:
