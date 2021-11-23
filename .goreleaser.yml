@@ -15,6 +15,9 @@ builds:
     - arm64
   goarm:
     - 7
+  ignore:
+    - goos: windows
+      goarch: arm
 archives:
   -
     format_overrides:
@@ -54,14 +57,14 @@ dockers:
 docker_manifests:
   - name_template:  itzg/{{ .ProjectName }}:{{ .Version }}
     image_templates:
-      -  itzg/{{ .ProjectName }}:latest-amd64
-      -  itzg/{{ .ProjectName }}:latest-arm64
-      -  itzg/{{ .ProjectName }}:latest-arm32v7
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-amd64
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm64
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm32v7
   - name_template:  itzg/{{ .ProjectName }}:latest
     image_templates:
-      -  itzg/{{ .ProjectName }}:latest-amd64
-      -  itzg/{{ .ProjectName }}:latest-arm64
-      -  itzg/{{ .ProjectName }}:latest-arm32v7
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-amd64
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm64
+      -  itzg/{{ .ProjectName }}:{{ .Version }}-arm32v7
 checksum:
   name_template: 'checksums.txt'
 snapshot:
