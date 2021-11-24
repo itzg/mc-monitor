@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"testing"
 )
@@ -35,14 +34,12 @@ func Test_encodePing(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotReader, gotErr := encodePing(nil, tt.args.host, tt.args.port)
+			buf := new(bytes.Buffer)
+			gotErr := encodePing(buf, tt.args.host, tt.args.port)
 
 			if (tt.err != nil) != (gotErr != nil) {
 				t.Errorf("expected %v, got %v", tt.err, gotErr)
 			}
-			var buf = new(bytes.Buffer)
-			_, err := io.Copy(buf, gotReader)
-			require.NoError(t, err)
 			formatted := fmt.Sprintf("%x", buf.Bytes())
 			assert.Equal(t, tt.frame, formatted)
 		})
