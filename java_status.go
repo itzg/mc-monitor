@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/avast/retry-go"
 	"github.com/itzg/mc-monitor/slp"
+	"go.uber.org/zap"
 	"log"
 	"os"
 	"time"
@@ -52,7 +53,9 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 	}
 }
 
-func (c *statusCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
+func (c *statusCmd) Execute(ctx context.Context, fs *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+	logger := args[0].(*zap.Logger)
+
 	if c.UseServerListPing {
 		return c.ExecuteServerListPing()
 	}
@@ -64,14 +67,17 @@ func (c *statusCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subc
 	if c.UseProxy {
 		options = append(options, mcpinger.WithProxyProto(c.ProxyVersion))
 	}
-	pinger := mcpinger.New(c.Host, uint16(c.Port), options...)
 
 	if c.RetryInterval <= 0 {
 		c.RetryInterval = 1 * time.Second
 	}
 
 	for {
+		logger.Debug("pinging")
+		pinger := mcpinger.New(c.Host, uint16(c.Port), options...)
 		info, err := pinger.Ping()
+		logger.Debug("ping returned", zap.Error(err), zap.Any("info", info))
+
 		if err != nil {
 			if c.RetryLimit > 0 {
 				c.RetryLimit--
