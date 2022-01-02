@@ -14,5 +14,5 @@ Use `docker-compose logs -f` to watch the logs of the containers. When the Minec
 
 Open a browser to <http://localhost:3000> and log in initially with the username "admin" and password "admin". You will then be prompted to create a new password for the admin user.
 
-A dashboard called "MC Monitor" is provisioned and can be accessed [in the dashboards section](http://localhost:3000/dashboards). That dashboard uses the Prometheus [datasource](http://localhost:3000/datasources) that was provisioned.
+[A dashboard called "MC Monitor"](http://localhost:3000/d/PpzSgJAnk/mc-monitor?orgId=1) is provisioned and can be accessed [in the dashboards section](http://localhost:3000/dashboards). That dashboard uses the Prometheus [datasource](http://localhost:3000/datasources) that was provisioned.
 

@@ -18,6 +18,15 @@ services:
       DEBUG: "true"
     depends_on:
       - mc
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    ports:
+      - "8180:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
   prometheus:
     image: prom/prometheus
     volumes:

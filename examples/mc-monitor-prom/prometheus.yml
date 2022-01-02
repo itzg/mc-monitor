@@ -5,3 +5,5 @@ scrape_configs:
     static_configs:
       - targets:
           - monitor:8080
+      - targets:
+          - cadvisor:8080
