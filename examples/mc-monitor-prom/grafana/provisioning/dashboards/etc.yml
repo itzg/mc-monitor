@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: 'etc files'
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true

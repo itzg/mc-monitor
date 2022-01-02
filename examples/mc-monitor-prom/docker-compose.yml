@@ -1,19 +1,43 @@
 version: '3'
 
 services:
-  prom:
-    image: prom/prometheus
+  mc:
+    image: itzg/minecraft-server
+    environment:
+      EULA: "true"
+      MEMORY: 2G
     ports:
-    - 9090:9090
+      - "25565:25565"
     volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - monitor
+      - mc-data:/data
   monitor:
-    build:
-      context: ../..
+    image: itzg/mc-monitor
     command: export-for-prometheus
     environment:
-      EXPORT_SERVERS: 127.0.0.1,mc.hypixel.net,play.cubecraft.net
-      EXPORT_BEDROCK_SERVERS: play.fallentech.io
+      EXPORT_SERVERS: mc
       DEBUG: "true"
+    depends_on:
+      - mc
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-tsdb:/prometheus
+    depends_on:
+      - monitor
+  grafana:
+    image: grafana/grafana-oss:${GRAFANA_VERSION:-8.3.3}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-lib:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./dashboards:/etc/grafana/dashboards
+    depends_on:
+      - prometheus
+
+
+volumes:
+  mc-data: {}
+  prometheus-tsdb: {}
+  grafana-lib: {}
