@@ -15,6 +15,7 @@ import (
 	mcpinger "github.com/Raqbit/mc-pinger"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
+	"github.com/xrjr/mcutils/pkg/ping"
 )
 
 type statusCmd struct {
@@ -22,6 +23,7 @@ type statusCmd struct {
 	Port int    `default:"25565" usage:"port of the Minecraft server" env:"MC_PORT"`
 
 	UseServerListPing bool `usage:"indicates the legacy, server list ping should be used for pre-1.12"`
+	UseMcUtils        bool `usage:"(experimental) try using mcutils to query the server"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
@@ -58,6 +60,10 @@ func (c *statusCmd) Execute(ctx context.Context, fs *flag.FlagSet, args ...inter
 
 	if c.UseServerListPing {
 		return c.ExecuteServerListPing()
+	}
+
+	if c.UseMcUtils {
+		return c.ExecuteMcUtilPing(logger)
 	}
 
 	var options []mcpinger.McPingerOption
@@ -130,6 +136,54 @@ func (c *statusCmd) ExecuteServerListPing() subcommands.ExitStatus {
 			fmt.Printf("%s:%d : version=%s online=%s max=%s motd='%s'\n",
 				c.Host, c.Port,
 				response.ServerVersion, response.CurrentPlayerCount, response.MaxPlayers, response.MessageOfTheDay)
+		}
+
+		return nil
+	}, retry.Delay(c.RetryInterval), retry.Attempts(uint(c.RetryLimit+1)))
+
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
+		return subcommands.ExitFailure
+	}
+
+	// regular output is within Do function
+	return subcommands.ExitSuccess
+}
+
+func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus {
+	client := ping.NewClient(c.Host, c.Port)
+	client.DialTimeout = c.Timeout
+	client.ReadTimeout = c.Timeout
+
+	err := retry.Do(func() error {
+
+		err := client.Connect()
+		if err != nil {
+			logger.Debug("Client failed to connect", zap.Error(err))
+			return err
+		}
+
+		defer client.Disconnect()
+
+		hs, err := client.Handshake()
+		if err != nil {
+			logger.Debug("Client failed to handshake", zap.Error(err))
+			return err
+		}
+
+		response := hs.Properties.Infos()
+		logger.Debug("mcutils ping returned", zap.Any("properties", response))
+
+		if response.Players.Max == 0 {
+			return errors.New("server not ready")
+		}
+
+		if c.ShowPlayerCount {
+			fmt.Printf("%d\n", response.Players.Online)
+		} else {
+			fmt.Printf("%s:%d : version=%s online=%d max=%d motd='%s'\n",
+				c.Host, c.Port,
+				response.Version.Name, response.Players.Online, response.Players.Max, response.Description)
 		}
 
 		return nil
