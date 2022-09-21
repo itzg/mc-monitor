@@ -46,6 +46,13 @@ docker run -it --rm itzg/mc-monitor status-bedrock --host play.fallentech.io
 
 where exit code will be 0 for success or 1 for failure.
 
+### Workarounds for some status errors
+
+Some Forge servers may cause a `string length out of bounds` error during status messages due to how the [FML2 protocol](https://wiki.vg/Minecraft_Forge_Handshake#FML2_protocol_.281.13_-_Current.29) bundles the entire modlist for client compatibility check. If there are issues with `status` failing when it otherwise should work, you can try out the experimental `--use-mc-utils` flag below (enables the [mcutils](https://github.com/xrjr/mcutils) protocol library):
+```
+docker run -it --rm itzg/mc-monitor status --use-mc-utils --host play.fallentech.io
+```
+
 ### Monitoring a server with Telegraf
 
 > The following example is provided in [examples/mc-monitor-telegraf](examples/mc-monitor-telegraf)
