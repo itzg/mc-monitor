@@ -3,7 +3,7 @@ module github.com/itzg/mc-monitor
 go 1.17
 
 require (
-	github.com/Raqbit/mc-pinger v0.2.2
+	github.com/Raqbit/mc-pinger v0.2.3
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/google/subcommands v1.2.0
 	github.com/itzg/go-flagsfiller v1.5.0
