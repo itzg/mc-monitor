@@ -11,9 +11,9 @@ require (
 	github.com/itzg/zapconfigs v0.1.0
 	github.com/prometheus/client_golang v1.13.0
 	github.com/sandertv/go-raknet v1.12.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.0
 	github.com/xrjr/mcutils v1.4.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.23.0
 )
 
 require (
@@ -34,5 +34,5 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
