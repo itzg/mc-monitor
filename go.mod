@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sandertv/go-raknet v1.12.0
 	github.com/stretchr/testify v1.8.2
-	github.com/xrjr/mcutils v1.4.0
+	github.com/xrjr/mcutils v1.5.1
 	go.uber.org/zap v1.24.0
 )
 
