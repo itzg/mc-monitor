@@ -47,7 +47,7 @@ func (c *statusBedrockCmd) Execute(ctx context.Context, f *flag.FlagSet, args ..
 	}
 
 	for {
-		info, err := PingBedrockServer(address)
+		info, err := PingBedrockServer(address, 0)
 		if err != nil {
 			if c.RetryLimit > 0 {
 				c.RetryLimit--

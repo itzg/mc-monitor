@@ -11,14 +11,16 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const promExportPath = "/metrics"
 
 type exportPrometheusCmd struct {
-	Servers        []string `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
-	BedrockServers []string `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
-	Port           int      `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
+	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
+	Port           int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	Timeout        time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
 	logger         *zap.Logger
 }
 
@@ -53,6 +55,10 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, logger)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	for i := range collectors {
+		collectors[i].SetTimeout(c.Timeout)
 	}
 
 	err = prometheus.Register(collectors)
