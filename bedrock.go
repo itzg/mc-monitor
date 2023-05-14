@@ -20,9 +20,15 @@ type BedrockServerInfo struct {
 	Rtt             time.Duration
 }
 
-func PingBedrockServer(address string) (*BedrockServerInfo, error) {
+func PingBedrockServer(address string, timeout time.Duration) (*BedrockServerInfo, error) {
 	start := time.Now()
-	response, err := raknet.Ping(address)
+	var response []byte
+	var err error
+	if timeout > 0 {
+		response, err = raknet.PingTimeout(address, timeout)
+	} else {
+		response, err = raknet.Ping(address)
+	}
 	rtt := time.Now().Sub(start)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query bedrock server %s: %w", address, err)

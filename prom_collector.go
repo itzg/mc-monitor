@@ -33,8 +33,24 @@ var (
 		promVariableLabels, nil)
 )
 
+type pingOptions interface {
+	GetHost() string
+	GetPort() uint16
+	GetTimeout() time.Duration
+}
+
+func pingJavaServer(opt pingOptions) (*mcpinger.ServerInfo, error) {
+	var opts []mcpinger.McPingerOption
+	if t := opt.GetTimeout(); t > 0 {
+		opts = append(opts, mcpinger.WithTimeout(t))
+	}
+	pinger := mcpinger.New(opt.GetHost(), opt.GetPort(), opts...)
+	return pinger.Ping()
+}
+
 type specificPromCollector interface {
 	Collect(metrics chan<- prometheus.Metric)
+	SetTimeout(t time.Duration)
 }
 
 type promCollectors []specificPromCollector
@@ -95,23 +111,38 @@ func createPromCollectors(servers []string, edition ServerEdition, logger *zap.L
 func newPromJavaCollector(host string, port uint16, logger *zap.Logger) specificPromCollector {
 	return &promJavaCollector{
 		host:   host,
-		port:   strconv.Itoa(int(port)),
-		pinger: mcpinger.New(host, port),
+		port:   port,
 		logger: logger,
 	}
 }
 
 type promJavaCollector struct {
-	host   string
-	port   string
-	pinger mcpinger.Pinger
-	logger *zap.Logger
+	host    string
+	port    uint16
+	logger  *zap.Logger
+	timeout time.Duration
+}
+
+func (c *promJavaCollector) GetHost() string {
+	return c.host
+}
+
+func (c *promJavaCollector) GetPort() uint16 {
+	return c.port
+}
+
+func (c *promJavaCollector) GetTimeout() time.Duration {
+	return c.timeout
+}
+
+func (c *promJavaCollector) SetTimeout(t time.Duration) {
+	c.timeout = t
 }
 
 func (c *promJavaCollector) Collect(metrics chan<- prometheus.Metric) {
-	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", c.port))
+	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", strconv.Itoa(int(c.port))))
 	startTime := time.Now()
-	info, err := c.pinger.Ping()
+	info, err := pingJavaServer(c)
 	elapsed := time.Now().Sub(startTime)
 
 	if err != nil {
@@ -133,7 +164,7 @@ func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *p
 	version string, value float64) {
 
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
-		c.host, c.port, string(JavaEdition), version)
+		c.host, strconv.Itoa(int(c.port)), string(JavaEdition), version)
 	if err != nil {
 		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
 	} else {
@@ -142,19 +173,36 @@ func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *p
 }
 
 type promBedrockCollector struct {
-	host   string
-	port   string
-	logger *zap.Logger
+	host    string
+	port    uint16
+	logger  *zap.Logger
+	timeout time.Duration
+}
+
+func (c *promBedrockCollector) GetHost() string {
+	return c.host
+}
+
+func (c *promBedrockCollector) GetPort() uint16 {
+	return c.port
+}
+
+func (c *promBedrockCollector) GetTimeout() time.Duration {
+	return c.timeout
+}
+
+func (c *promBedrockCollector) SetTimeout(t time.Duration) {
+	c.timeout = t
 }
 
 func newPromBedrockCollector(host string, port uint16, logger *zap.Logger) *promBedrockCollector {
-	return &promBedrockCollector{host: host, port: strconv.Itoa(int(port)), logger: logger}
+	return &promBedrockCollector{host: host, port: port, logger: logger}
 }
 
 func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
-	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", c.port))
+	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", strconv.Itoa(int(c.port))))
 
-	info, err := PingBedrockServer(net.JoinHostPort(c.host, c.port))
+	info, err := PingBedrockServer(net.JoinHostPort(c.host, strconv.Itoa(int(c.port))), c.timeout)
 	if err != nil {
 		c.sendMetric(metrics, promDescHealthy, "", 0)
 	} else {
@@ -169,7 +217,7 @@ func (c *promBedrockCollector) sendMetric(metrics chan<- prometheus.Metric,
 	desc *prometheus.Desc, version string, value float64) {
 
 	metric, err := prometheus.NewConstMetric(desc, prometheus.GaugeValue, value,
-		c.host, c.port, string(BedrockEdition), version)
+		c.host, strconv.Itoa(int(c.port)), string(BedrockEdition), version)
 	if err != nil {
 		c.logger.Error("failed to build metric", zap.Error(err), zap.String("name", desc.String()))
 	} else {
