@@ -19,7 +19,7 @@ services:
     depends_on:
       - mc
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.47.1
     ports:
       - "8180:8080"
     volumes:
