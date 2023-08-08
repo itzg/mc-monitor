@@ -14,7 +14,7 @@ builds:
     - arm
     - arm64
   goarm:
-    - 7
+    - "7"
   ignore:
     - goos: windows
       goarch: arm
@@ -77,16 +77,16 @@ changelog:
     - '^test:'
     - '^ci:'
     - '^misc:'
-scoop:
-  bucket:
-    owner: itzg
-    name: scoop-bucket
-    token: "{{ .Env.PUSH_GITHUB_TOKEN }}"
-  folder: bucket
-  license: MIT
-  description: Command/agent to monitor the status of Minecraft servers
+scoops:
+  - repository:
+      owner: itzg
+      name: scoop-bucket
+      token: "{{ .Env.PUSH_GITHUB_TOKEN }}"
+    folder: bucket
+    license: MIT
+    description: Command/agent to monitor the status of Minecraft servers
 brews:
-  - tap:
+  - repository:
       owner: itzg
       name: homebrew-tap
       token: "{{ .Env.PUSH_GITHUB_TOKEN }}"
