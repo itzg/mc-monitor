@@ -27,7 +27,7 @@ type statusCmd struct {
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
-	Timeout       time.Duration `usage:"the timeout the ping can take as a maximum" default:"60s"`
+	Timeout       time.Duration `usage:"the timeout the ping can take as a maximum" default:"15s"`
 
 	UseProxy     bool `usage:"supports contacting Bungeecord when proxy_protocol enabled"`
 	ProxyVersion byte `usage:"version of PROXY protocol to use" default:"1"`
@@ -55,7 +55,7 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 	}
 }
 
-func (c *statusCmd) Execute(ctx context.Context, fs *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 	logger := args[0].(*zap.Logger)
 
 	if c.UseServerListPing {
@@ -163,6 +163,7 @@ func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus
 			return err
 		}
 
+		//goland:noinspection GoUnhandledErrorResult
 		defer client.Disconnect()
 
 		hs, err := client.Handshake()
