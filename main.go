@@ -35,7 +35,19 @@ func main() {
 
 	var logger *zap.Logger
 	if config.Debug {
-		logger = zapconfigs.NewDebugLogger()
+		zapConfig := zap.Config{
+			Encoding:      "console",
+			EncoderConfig: zapconfigs.NewDebugEncoderConfig(),
+			Level:         zap.NewAtomicLevelAt(zap.DebugLevel),
+			// output to stderr so that scripts grabbing output don't get logs
+			OutputPaths:      []string{"stderr"},
+			ErrorOutputPaths: []string{"stderr"},
+		}
+		var err error
+		logger, err = zapConfig.Build()
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		logger = zapconfigs.NewDefaultLogger()
 	}
@@ -65,7 +77,7 @@ func (c *versionCmd) Usage() string {
 func (c *versionCmd) SetFlags(*flag.FlagSet) {
 }
 
-func (c *versionCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *versionCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
 	fmt.Printf("%s commit=%s date=%s\n", version, commit, date)
 	return subcommands.ExitSuccess
 }
