@@ -81,7 +81,7 @@ scoops:
   - repository:
       owner: itzg
       name: scoop-bucket
-      token: "{{ .Env.PUSH_GITHUB_TOKEN }}"
+      token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
     folder: bucket
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
@@ -89,6 +89,6 @@ brews:
   - repository:
       owner: itzg
       name: homebrew-tap
-      token: "{{ .Env.PUSH_GITHUB_TOKEN }}"
+      token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
