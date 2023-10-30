@@ -6,7 +6,7 @@ require (
 	github.com/Raqbit/mc-pinger v0.2.3
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/google/subcommands v1.2.0
-	github.com/itzg/go-flagsfiller v1.12.0
+	github.com/itzg/go-flagsfiller v1.13.1
 	github.com/itzg/line-protocol-sender v0.1.1
 	github.com/itzg/zapconfigs v0.1.0
 	github.com/prometheus/client_golang v1.17.0
@@ -22,7 +22,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/df-mc/atomic v1.10.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/iancoleman/strcase v0.2.0 // indirect
+	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20210311194329-9aa0e372d097 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/pires/go-proxyproto v0.7.0 // indirect
