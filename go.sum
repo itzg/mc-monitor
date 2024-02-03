@@ -827,6 +827,8 @@ github.com/itzg/go-flagsfiller v1.14.0 h1:GQOO5Uiy9eQZaJM5f/DjLf3VAn1PNbEHiK/Igv
 github.com/itzg/go-flagsfiller v1.14.0/go.mod h1:vSclFjMCgjtH6SB0tCkVyX/OwO/aaInbKmX6H8iJ54Y=
 github.com/itzg/line-protocol-sender v0.1.1 h1:UA01VBt3/whRxpwO425w60pdNmgjnGV1tseR4qh6mC0=
 github.com/itzg/line-protocol-sender v0.1.1/go.mod h1:Cd948iZ7YibnGcLt5D/11RfKmteh8lQyXpGUbY97WBw=
+github.com/itzg/mc-pinger v0.2.4 h1:uhR1kZi+Qh0S19MB4VmmPvtjXTm3Fpa+7oTI96xrSZo=
+github.com/itzg/mc-pinger v0.2.4/go.mod h1:HMHMz4UQnTENEUQGgwO+Smp8N3Zjfe5reBniWmgqcTo=
 github.com/itzg/zapconfigs v0.1.0 h1:Gokocm8VaTNnZjvIiVA5NEhzZ1v7lEyXY/AbeBmq6YQ=
 github.com/itzg/zapconfigs v0.1.0/go.mod h1:y4dArgRUOFbGRkUNJ8XSSw98FGn03wtkvMPy+OSA5Rc=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
@@ -883,6 +885,7 @@ github.com/phpdave11/gofpdi v1.0.12/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk
 github.com/phpdave11/gofpdi v1.0.13/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/pierrec/lz4/v4 v4.1.15/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pires/go-proxyproto v0.6.0/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
+github.com/pires/go-proxyproto v0.6.1/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
 github.com/pires/go-proxyproto v0.7.0 h1:IukmRewDQFWC7kfnb66CSomk2q/seBuilHBYFwyq0Hs=
 github.com/pires/go-proxyproto v0.7.0/go.mod h1:Vz/1JPY/OACxWGQNIRY2BeyDmpoaWmEP40O9LbuiFR4=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
