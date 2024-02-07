@@ -601,8 +601,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/Raqbit/mc-pinger v0.2.3 h1:CpXd6s3V3Nduy8AWngg18qKwsunLAilRDZqC9F9/KDg=
-github.com/Raqbit/mc-pinger v0.2.3/go.mod h1:3BtpUQAShwS0ClpL0Mfs8Lr4W42tOOCbtMtw9mw3Kng=
+github.com/Raqbit/mc-pinger v0.2.4 h1:s1iR1qQ/tGSktwPAmn8Lj94pjvn9xreipA++60ksmnw=
+github.com/Raqbit/mc-pinger v0.2.4/go.mod h1:AeR7Gd9CW5VbYA5xA9vy0pvbWLOFoV8p8HP5/zpFthQ=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=
 github.com/ajstarks/deck/generate v0.0.0-20210309230005-c3f852c02e19/go.mod h1:T13YZdzov6OU0A1+RfKZiZN9ca6VeKdBdyDV+BY97Tk=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
@@ -827,8 +827,6 @@ github.com/itzg/go-flagsfiller v1.14.0 h1:GQOO5Uiy9eQZaJM5f/DjLf3VAn1PNbEHiK/Igv
 github.com/itzg/go-flagsfiller v1.14.0/go.mod h1:vSclFjMCgjtH6SB0tCkVyX/OwO/aaInbKmX6H8iJ54Y=
 github.com/itzg/line-protocol-sender v0.1.1 h1:UA01VBt3/whRxpwO425w60pdNmgjnGV1tseR4qh6mC0=
 github.com/itzg/line-protocol-sender v0.1.1/go.mod h1:Cd948iZ7YibnGcLt5D/11RfKmteh8lQyXpGUbY97WBw=
-github.com/itzg/mc-pinger v0.2.4 h1:uhR1kZi+Qh0S19MB4VmmPvtjXTm3Fpa+7oTI96xrSZo=
-github.com/itzg/mc-pinger v0.2.4/go.mod h1:HMHMz4UQnTENEUQGgwO+Smp8N3Zjfe5reBniWmgqcTo=
 github.com/itzg/zapconfigs v0.1.0 h1:Gokocm8VaTNnZjvIiVA5NEhzZ1v7lEyXY/AbeBmq6YQ=
 github.com/itzg/zapconfigs v0.1.0/go.mod h1:y4dArgRUOFbGRkUNJ8XSSw98FGn03wtkvMPy+OSA5Rc=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
@@ -884,7 +882,6 @@ github.com/phpdave11/gofpdf v1.4.2/go.mod h1:zpO6xFn9yxo3YLyMvW8HcKWVdbNqgIfOOp2
 github.com/phpdave11/gofpdi v1.0.12/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/phpdave11/gofpdi v1.0.13/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/pierrec/lz4/v4 v4.1.15/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
-github.com/pires/go-proxyproto v0.6.0/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
 github.com/pires/go-proxyproto v0.6.1/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
 github.com/pires/go-proxyproto v0.7.0 h1:IukmRewDQFWC7kfnb66CSomk2q/seBuilHBYFwyq0Hs=
 github.com/pires/go-proxyproto v0.7.0/go.mod h1:Vz/1JPY/OACxWGQNIRY2BeyDmpoaWmEP40O9LbuiFR4=
