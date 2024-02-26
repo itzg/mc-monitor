@@ -13,7 +13,7 @@ require (
 	github.com/sandertv/go-raknet v1.12.1
 	github.com/stretchr/testify v1.8.4
 	github.com/xrjr/mcutils v1.5.1
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 )
 
 require (
