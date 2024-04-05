@@ -78,33 +78,22 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 		c.RetryInterval = 1 * time.Second
 	}
 
-	for {
+	err := retry.Do(func() error {
 		logger.Debug("pinging")
 		pinger := mcpinger.New(c.Host, uint16(c.Port), options...)
 		info, err := pinger.Ping()
 		logger.Debug("ping returned", zap.Error(err), zap.Any("info", info))
-
 		if err != nil {
-			if c.RetryLimit > 0 {
-				c.RetryLimit--
-				time.Sleep(c.RetryInterval)
-				continue
-			}
-			_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
-			return subcommands.ExitFailure
+			return err
 		}
 
 		// While server is starting up it will answer pings, but respond with empty JSON object.
 		// As such, we'll sanity check the max players value to see if a zero-value has been
 		// provided for info.
 		if info.Players.Max == 0 {
-			if c.RetryLimit > 0 {
-				c.RetryLimit--
-				time.Sleep(c.RetryInterval)
-				continue
-			}
+
 			_, _ = fmt.Fprintf(os.Stderr, "server not ready %s:%d", c.Host, c.Port)
-			return subcommands.ExitFailure
+			return errors.New("server not ready")
 		}
 
 		if c.ShowPlayerCount {
@@ -115,6 +104,14 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 				info.Version.Name, info.Players.Online, info.Players.Max, info.Description.Text)
 		}
 
+		return nil
+
+	}, retry.Delay(c.RetryInterval), retry.Attempts(uint(c.RetryLimit+1)))
+
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
+		return subcommands.ExitFailure
+	} else {
 		return subcommands.ExitSuccess
 	}
 }
