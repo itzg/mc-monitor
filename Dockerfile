@@ -1,4 +1,4 @@
-FROM golang:1.21 as builder
+FROM golang:1.22 as builder
 
 WORKDIR /build
 
@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o mc-monitor
+RUN CGO_ENABLED=0 go build -buildvcs=false -o mc-monitor
 
 FROM scratch
 ENTRYPOINT ["/mc-monitor"]
