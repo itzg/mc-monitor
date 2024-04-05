@@ -106,7 +106,7 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 
 		return nil
 
-	}, retry.Delay(c.RetryInterval), retry.Attempts(uint(c.RetryLimit+1)))
+	}, retry.Delay(c.RetryInterval), retry.DelayType(retry.FixedDelay), retry.Attempts(uint(c.RetryLimit+1)))
 
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
@@ -136,7 +136,7 @@ func (c *statusCmd) ExecuteServerListPing() subcommands.ExitStatus {
 		}
 
 		return nil
-	}, retry.Delay(c.RetryInterval), retry.Attempts(uint(c.RetryLimit+1)))
+	}, retry.Delay(c.RetryInterval), retry.DelayType(retry.FixedDelay), retry.Attempts(uint(c.RetryLimit+1)))
 
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
@@ -185,7 +185,7 @@ func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus
 		}
 
 		return nil
-	}, retry.Delay(c.RetryInterval), retry.Attempts(uint(c.RetryLimit+1)))
+	}, retry.Delay(c.RetryInterval), retry.DelayType(retry.FixedDelay), retry.Attempts(uint(c.RetryLimit+1)))
 
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
