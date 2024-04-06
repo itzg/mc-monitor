@@ -106,7 +106,11 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 
 		return nil
 
-	}, retry.Delay(c.RetryInterval), retry.DelayType(retry.FixedDelay), retry.Attempts(uint(c.RetryLimit+1)))
+	},
+		retry.Delay(c.RetryInterval),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(uint(c.RetryLimit+1)),
+		retry.LastErrorOnly(true))
 
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
