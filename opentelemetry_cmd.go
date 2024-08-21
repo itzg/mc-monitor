@@ -75,13 +75,11 @@ func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, 
 	c.logger = args[0].(*zap.Logger).Named("otel")
 
 	// Create the  resources to be monitored
-	resources := make([]otelResource, 0)
-	metricChecker, err := c.initializeMetricResources()
+	resources, err := c.initializeMetricResources()
 	if err != nil {
 		printUsageError(fmt.Sprintf("failed to create metric checker: %v", err))
 		return subcommands.ExitFailure
 	}
-	resources = append(resources, metricChecker...)
 
 	// Start the observing loop
 	ticker := time.NewTicker(c.Interval)
