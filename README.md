@@ -134,7 +134,7 @@ Open Telemetry is a vendor-agnostic way to receive, process and export telemetry
 
 Once you run the mc-monitor application using the `collect-for-opentelemetry` subcommand, mc-monitor will create the necessary [instrumentation](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
 
-The Collector will receive and process the data, sending the metrics to any of the supported [backends](https://opentelemetry.io/docs/collector/configuration/#exporters). In our example, you will find the necessary configurations to export metrics trough Prometheus.
+The Collector will receive and process the data, sending the metrics to any of the supported [backends](https://opentelemetry.io/docs/collector/configuration/#exporters). In our example, you will find the necessary configurations to export metrics through Prometheus.
 
 The `collect-for-opentelemetry` sub-command accepts the following arguments, which can also be viewed using `--help`:
 
