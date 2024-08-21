@@ -20,10 +20,10 @@ type collectOpenTelemetryCmd struct {
 	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
 	BedRockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
 	Interval       time.Duration `default:"10s" usage:"Collect and sends OpenTelemetry data at this interval"`
-	Exporter       struct {
+	OtelCollector  struct {
 		Endpoint string        `default:"localhost:4317" usage:"OpenTelemetry gRPC endpoint to export data"`
 		Timeout  time.Duration `default:"35s" usage:"Timeout for collecting OpenTelemetry data"`
-	} `group:"exporter" namespace:"exporter" usage:"Open Telemetry Exporter configurations"`
+	} `group:"exporter" namespace:"exporter" usage:"Open Telemetry OtelCollector configurations"`
 	logger *zap.Logger
 }
 
@@ -45,7 +45,7 @@ func (c *collectOpenTelemetryCmd) Usage() string {
 }
 
 func (c *collectOpenTelemetryCmd) SetFlags(f *flag.FlagSet) {
-	filler := flagsfiller.New(flagsfiller.WithEnv("OpenTelemetry"))
+	filler := flagsfiller.New(flagsfiller.WithEnv("Export"))
 	err := filler.Fill(f, c)
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +59,7 @@ func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, 
 		return subcommands.ExitUsageError
 	}
 
-	if c.Exporter.Endpoint == "" {
+	if c.OtelCollector.Endpoint == "" {
 		printUsageError("the open telemetry endpoint must be set")
 		return subcommands.ExitUsageError
 	}
@@ -107,7 +107,7 @@ func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, 
 
 // startMeterProvider constructs and starts the exporter that will be sending telemetry data from a meter provider that is set
 func (c *collectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (ShutdownFunc, error) {
-	exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithEndpoint(c.Exporter.Endpoint), otlpmetricgrpc.WithInsecure())
+	exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithEndpoint(c.OtelCollector.Endpoint), otlpmetricgrpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *collectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (Shutd
 		metric.WithReader(
 			metric.NewPeriodicReader(
 				exporter,
-				metric.WithTimeout(c.Exporter.Timeout),
+				metric.WithTimeout(c.OtelCollector.Timeout),
 				metric.WithInterval(c.Interval),
 			),
 		),
