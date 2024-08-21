@@ -1,0 +1,64 @@
+services:
+  # Initialize the server
+  mc:
+    image: itzg/minecraft-server
+    environment:
+        EULA: "true"
+        MEMORY: 2G
+    ports:
+      - "25565:25565"
+    volumes:
+      - mc-data:/data
+
+  # Initialize the monitor
+  monitor:
+    image: itzg/mc-monitor
+    command: ['collect-for-opentelemetry', '-exporter-endpoint=otel_collector:4317', '-exporter-timeout=35s']
+    environment:
+      EXPORT_SERVERS: mc
+      DEBUG: "true"
+    depends_on:
+      - mc
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-tsdb:/prometheus
+    depends_on:
+      - monitor
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-lib:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./dashboards:/etc/grafana/dashboards
+    depends_on:
+      - prometheus
+    environment:
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+  # OTel Collector
+  otel_collector:
+    image: otel/opentelemetry-collector-contrib
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC Receiver
+      - "8888:8888" # Metrics Exporter
+      - "8889:8889" # Prometheus Exporter
+
+volumes:
+  mc-data:
+  prometheus-tsdb:
+  grafana-lib:
