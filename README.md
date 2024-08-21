@@ -22,7 +22,7 @@ Subcommands:
 Subcommands for monitoring:
 	export-for-prometheus  Registers an HTTP metrics endpoints for Prometheus export
 	gather-for-telegraf  Periodically gathers to status of one or more Minecraft servers and sends metrics to telegraf over TCP using Influx line protocol
-	collect-for-opentelemetry Periodically collects to status of one or more Minecraft servers and sends metrics to an OpenTelemetry 
+	collect-otel Periodically collects to status of one or more Minecraft servers and sends metrics to an OpenTelemetry 
 	Collector using the gRPC protocol
 
 Subcommands for status:
@@ -132,11 +132,12 @@ An example Docker composition is provided in [examples/mc-monitor-prom](examples
 
 Open Telemetry is a vendor-agnostic way to receive, process and export telemetry data. In this context, monitoring a Minecraft Server with Open Telemetry requires a running [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to receive the exported data. An example on how to initialize it can be found in [examples/mc-monitor-otel](examples/mc-monitor-otel).
 
-Once you run the mc-monitor application using the `collect-for-opentelemetry` subcommand, mc-monitor will create the necessary [instrumentation](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
+Once you run the mc-monitor application using the `collect-otel` subcommand, mc-monitor will create the necessary [instrumentation]
+(https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
 
 The Collector will receive and process the data, sending the metrics to any of the supported [backends](https://opentelemetry.io/docs/collector/configuration/#exporters). In our example, you will find the necessary configurations to export metrics through Prometheus.
 
-The `collect-for-opentelemetry` sub-command accepts the following arguments, which can also be viewed using `--help`:
+The `collect-otel` sub-command accepts the following arguments, which can also be viewed using `--help`:
 
 ```
   -servers host:port
