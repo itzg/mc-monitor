@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type otelResource interface {
+type Resource interface {
 	Execute()
 }
 

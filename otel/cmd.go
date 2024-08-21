@@ -21,11 +21,13 @@ type CollectOpenTelemetryCmd struct {
 	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
 	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
 	Interval       time.Duration `default:"10s" usage:"Collect and sends OpenTelemetry data at this interval"`
-	OtelCollector  struct {
-		Endpoint string        `default:"localhost:4317" usage:"OpenTelemetry gRPC endpoint to export data"`
-		Timeout  time.Duration `default:"35s" usage:"Timeout for collecting OpenTelemetry data"`
-	} `group:"exporter" namespace:"exporter" usage:"Open Telemetry OtelCollector configurations"`
-	logger *zap.Logger
+	OtelCollector  Collector     `group:"exporter" namespace:"exporter" usage:"Open Telemetry OtelCollector configurations"`
+	logger         *zap.Logger
+}
+
+type Collector struct {
+	Endpoint string        `default:"localhost:4317" usage:"OpenTelemetry gRPC endpoint to export data"`
+	Timeout  time.Duration `default:"35s" usage:"Timeout for collecting OpenTelemetry data"`
 }
 
 // ShutdownFunc is a function that can be called to shut down the Open Telemetry provider components
@@ -144,10 +146,10 @@ func (c *CollectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (Shutd
 
 // initializeMetricResources creates the OpenTelemetry Metric resources for the given servers
 func (c *CollectOpenTelemetryCmd) initializeMetricResources() (
-	[]otelResource,
+	[]Resource,
 	error,
 ) {
-	resources := make([]otelResource, 0)
+	resources := make([]Resource, 0)
 
 	for _, server := range c.Servers {
 		host, port, err := utils.SplitHostPort(server, utils.DefaultJavaPort)
