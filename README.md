@@ -130,7 +130,7 @@ An example Docker composition is provided in [examples/mc-monitor-prom](examples
 
 ### Monitoring a server with Open Telemetry
 
-Open Telemetry is a vendor-agnostic way to receive, process and export telemetry data. In this context, monitoring a Minecraft Server with Open Telemetry requires a running [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to receive the exported data. An example on how to initialize it can be found in [examples/mc-monitor-opentelemetry](examples/mc-monitor-opentelemetry).
+Open Telemetry is a vendor-agnostic way to receive, process and export telemetry data. In this context, monitoring a Minecraft Server with Open Telemetry requires a running [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to receive the exported data. An example on how to initialize it can be found in [examples/mc-monitor-otel](examples/mc-monitor-otel).
 
 Once you run the mc-monitor application using the `collect-for-opentelemetry` subcommand, mc-monitor will create the necessary [instrumentation](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
 
@@ -164,4 +164,4 @@ with the labels
 - `server_edition` : `java` or `bedrock`
 - `server_version`
 
-An example Docker composition is provided in [examples/mc-monitor-opentelemetry](examples/mc-monitor-opentelemetry).
+An example Docker composition is provided in [examples/mc-monitor-otel](examples/mc-monitor-otel).
