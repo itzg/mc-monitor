@@ -58,12 +58,12 @@ func (r *OpenTelemetryMetricResource) Execute() {
 	info, err := r.pinger.Ping()
 	elapsed := time.Now().Sub(startTime)
 	if err != nil || info.Players.Max == 0 {
-		Metrics().RecordHealth(false, getOTelMetricAttributes(r.host, r.port, r.edition, ""))
+		Metrics().RecordHealth(false, buildMetricAttributes(r.host, r.port, r.edition, ""))
 		return
 	}
 
-	Metrics().RecordResponseTime(elapsed.Seconds(), getOTelMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordHealth(true, getOTelMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordPlayersOnlineCount(float64(info.Players.Online), getOTelMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordPlayersMaxCount(float64(info.Players.Max), getOTelMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	Metrics().RecordResponseTime(elapsed.Seconds(), buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	Metrics().RecordHealth(true, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	Metrics().RecordPlayersOnlineCount(info.Players.Online, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	Metrics().RecordPlayersMaxCount(info.Players.Max, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
 }
