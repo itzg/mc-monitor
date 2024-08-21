@@ -205,7 +205,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 20,
+        "w": 11,
         "x": 4,
         "y": 0
       },
@@ -248,6 +248,112 @@
         }
       ],
       "title": "Players",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ddvhhy79lfr40e"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "response_time"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "minecraft_status_response_time{server_host=\"$server\"}",
+          "interval": "",
+          "legendFormat": "response_time",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Response time",
       "type": "timeseries"
     },
     {
@@ -349,7 +455,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ddvhhy79lfr40e"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -432,13 +538,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
           "exemplar": true,
           "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"$server\"}",
           "format": "time_series",
           "interval": "",
           "legendFormat": "{{container_label_com_docker_compose_service}}",
-          "range": true,
           "refId": "A"
         }
       ],
@@ -493,6 +597,6 @@
   "timezone": "",
   "title": "MC Monitor",
   "uid": "PpzSgJAnk",
-  "version": 10,
+  "version": 11,
   "weekStart": ""
 }
