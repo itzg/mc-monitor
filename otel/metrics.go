@@ -48,7 +48,7 @@ func (m *serverMetrics) RecordResponseTime(responseTime float64, attributes []at
 
 func (m *serverMetrics) RecordPlayersOnlineCount(playersOnlineCount int32, attributes []attribute.KeyValue) {
 	_ = NewInt64ObservableGauge(
-		"minecraft_players_online_count",
+		"minecraft_status_players_online_count",
 		"The number of players currently online on the server",
 		func() int64 {
 			return int64(playersOnlineCount)
@@ -59,7 +59,7 @@ func (m *serverMetrics) RecordPlayersOnlineCount(playersOnlineCount int32, attri
 
 func (m *serverMetrics) RecordPlayersMaxCount(playersMaxCount int32, attributes []attribute.KeyValue) {
 	_ = NewInt64ObservableGauge(
-		"minecraft_players_max_count",
+		"minecraft_status_players_max_count",
 		"The maximum number of players that can be online on the server",
 		func() int64 {
 			return int64(playersMaxCount)
