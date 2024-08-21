@@ -1,10 +1,11 @@
-package main
+package otel
 
 import (
 	"strconv"
 	"time"
 
 	mcpinger "github.com/Raqbit/mc-pinger"
+	"github.com/itzg/mc-monitor/utils"
 	"go.uber.org/zap"
 )
 
@@ -12,30 +13,33 @@ type otelResource interface {
 	Execute()
 }
 
-type OTelMetricResource struct {
+type OpenTelemetryMetricResource struct {
 	host    string
 	port    uint16
-	edition ServerEdition
+	edition utils.ServerEdition
 	pinger  mcpinger.Pinger
 	logger  *zap.Logger
 }
 
-type OTelMetricResourceOptions func(r *OTelMetricResource)
+type OpenTelemetryMetricResourceOptions func(r *OpenTelemetryMetricResource)
 
-func withServerEdition(edition ServerEdition) OTelMetricResourceOptions {
-	return func(r *OTelMetricResource) {
+func withServerEdition(edition utils.ServerEdition) OpenTelemetryMetricResourceOptions {
+	return func(r *OpenTelemetryMetricResource) {
 		r.edition = edition
 	}
 }
 
-func withLogger(logger *zap.Logger) OTelMetricResourceOptions {
-	return func(r *OTelMetricResource) {
+func withLogger(logger *zap.Logger) OpenTelemetryMetricResourceOptions {
+	return func(r *OpenTelemetryMetricResource) {
 		r.logger = logger
 	}
 }
 
-func newOpenTelemetryMetricResource(host string, port uint16, options ...OTelMetricResourceOptions) (*OTelMetricResource, error) {
-	resource := &OTelMetricResource{
+func newOpenTelemetryMetricResource(host string, port uint16, options ...OpenTelemetryMetricResourceOptions) (
+	*OpenTelemetryMetricResource,
+	error,
+) {
+	resource := &OpenTelemetryMetricResource{
 		host:   host,
 		port:   port,
 		pinger: mcpinger.New(host, port),
@@ -48,7 +52,7 @@ func newOpenTelemetryMetricResource(host string, port uint16, options ...OTelMet
 	return resource, nil
 }
 
-func (r *OTelMetricResource) Execute() {
+func (r *OpenTelemetryMetricResource) Execute() {
 	r.logger.Debug("pinging", zap.String("host", r.host), zap.String("port", strconv.Itoa(int(r.port))))
 	startTime := time.Now()
 	info, err := r.pinger.Ping()

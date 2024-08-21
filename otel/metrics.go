@@ -1,9 +1,10 @@
-package main
+package otel
 
 import (
 	"context"
 	"strconv"
 
+	"github.com/itzg/mc-monitor/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -97,7 +98,7 @@ func handleError(msg string, err error) {
 	}
 }
 
-func getOTelMetricAttributes(host string, port uint16, edition ServerEdition, version string) []attribute.KeyValue {
+func getOTelMetricAttributes(host string, port uint16, edition utils.ServerEdition, version string) []attribute.KeyValue {
 	var attributes = make([]attribute.KeyValue, 0)
 
 	if host != "" {

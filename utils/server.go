@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -6,7 +6,24 @@ import (
 	"strings"
 )
 
-// @deprecated use utils.SplitHostPort instead
+type ServerEdition string
+
+const (
+	JavaEdition    ServerEdition = "java"
+	BedrockEdition ServerEdition = "bedrock"
+
+	DefaultJavaPort    uint16 = 25565
+	DefaultBedrockPort uint16 = 19132
+)
+
+func ValidEdition(v string) bool {
+	switch ServerEdition(v) {
+	case JavaEdition, BedrockEdition:
+		return true
+	}
+	return false
+}
+
 func SplitHostPort(hostport string, defaultPort uint16) (string, uint16, error) {
 	parts := strings.SplitN(hostport, ":", 2)
 	if len(parts) == 2 {
@@ -20,7 +37,6 @@ func SplitHostPort(hostport string, defaultPort uint16) (string, uint16, error) 
 	}
 }
 
-// @deprecated use utils.NormalizeHostPort instead
 func NormalizeHostPort(hostport string, defaultPort uint16) string {
 	if strings.Contains(hostport, ":") {
 		return hostport

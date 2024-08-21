@@ -1,4 +1,4 @@
-package main
+package otel
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
+	"github.com/itzg/mc-monitor/utils"
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -16,7 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type collectOpenTelemetryCmd struct {
+type CollectOpenTelemetryCmd struct {
 	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
 	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
 	Interval       time.Duration `default:"10s" usage:"Collect and sends OpenTelemetry data at this interval"`
@@ -32,19 +33,19 @@ type ShutdownFunc func() error
 
 var _histogramBuckets = []float64{0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10, 25, 50, 100}
 
-func (c *collectOpenTelemetryCmd) Name() string {
+func (c *CollectOpenTelemetryCmd) Name() string {
 	return "collect-otel"
 }
 
-func (c *collectOpenTelemetryCmd) Synopsis() string {
+func (c *CollectOpenTelemetryCmd) Synopsis() string {
 	return "Starts collecting telemetry data using OpenTelemetry"
 }
 
-func (c *collectOpenTelemetryCmd) Usage() string {
+func (c *CollectOpenTelemetryCmd) Usage() string {
 	return ""
 }
 
-func (c *collectOpenTelemetryCmd) SetFlags(f *flag.FlagSet) {
+func (c *CollectOpenTelemetryCmd) SetFlags(f *flag.FlagSet) {
 	filler := flagsfiller.New(flagsfiller.WithEnv("Export"))
 	err := filler.Fill(f, c)
 	if err != nil {
@@ -52,22 +53,22 @@ func (c *collectOpenTelemetryCmd) SetFlags(f *flag.FlagSet) {
 	}
 }
 
-func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *CollectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 	// Validate the command line arguments
 	if (len(c.Servers) + len(c.BedrockServers)) == 0 {
-		printUsageError("requires at least one server")
+		utils.PrintUsageError("requires at least one server")
 		return subcommands.ExitUsageError
 	}
 
 	if c.OtelCollector.Endpoint == "" {
-		printUsageError("the open telemetry endpoint must be set")
+		utils.PrintUsageError("the open telemetry endpoint must be set")
 		return subcommands.ExitUsageError
 	}
 
 	// Start the OpenTelemetry meter provider
 	meterShutdownFunc, err := c.startMeterProvider(ctx)
 	if err != nil {
-		printUsageError(fmt.Sprintf("failed to start meter provider: %v", err))
+		utils.PrintUsageError(fmt.Sprintf("failed to start meter provider: %v", err))
 		return subcommands.ExitFailure
 	}
 
@@ -77,7 +78,7 @@ func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, 
 	// Create the  resources to be monitored
 	resources, err := c.initializeMetricResources()
 	if err != nil {
-		printUsageError(fmt.Sprintf("failed to create metric checker: %v", err))
+		utils.PrintUsageError(fmt.Sprintf("failed to create metric checker: %v", err))
 		return subcommands.ExitFailure
 	}
 
@@ -104,7 +105,7 @@ func (c *collectOpenTelemetryCmd) Execute(ctx context.Context, _ *flag.FlagSet, 
 }
 
 // startMeterProvider constructs and starts the exporter that will be sending telemetry data from a meter provider that is set
-func (c *collectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (ShutdownFunc, error) {
+func (c *CollectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (ShutdownFunc, error) {
 	exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithEndpoint(c.OtelCollector.Endpoint), otlpmetricgrpc.WithInsecure())
 	if err != nil {
 		return nil, err
@@ -142,14 +143,14 @@ func (c *collectOpenTelemetryCmd) startMeterProvider(ctx context.Context) (Shutd
 }
 
 // initializeMetricResources creates the OpenTelemetry Metric resources for the given servers
-func (c *collectOpenTelemetryCmd) initializeMetricResources() (
+func (c *CollectOpenTelemetryCmd) initializeMetricResources() (
 	[]otelResource,
 	error,
 ) {
 	resources := make([]otelResource, 0)
 
 	for _, server := range c.Servers {
-		host, port, err := SplitHostPort(server, DefaultJavaPort)
+		host, port, err := utils.SplitHostPort(server, utils.DefaultJavaPort)
 		if err != nil {
 			return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
 		}
@@ -158,7 +159,7 @@ func (c *collectOpenTelemetryCmd) initializeMetricResources() (
 		resource, err := newOpenTelemetryMetricResource(
 			host,
 			port,
-			withServerEdition(JavaEdition),
+			withServerEdition(utils.JavaEdition),
 			withLogger(c.logger),
 		)
 		if err != nil {
@@ -168,7 +169,7 @@ func (c *collectOpenTelemetryCmd) initializeMetricResources() (
 	}
 
 	for _, server := range c.BedrockServers {
-		host, port, err := SplitHostPort(server, DefaultBedrockPort)
+		host, port, err := utils.SplitHostPort(server, utils.DefaultBedrockPort)
 		if err != nil {
 			return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
 		}
@@ -177,7 +178,7 @@ func (c *collectOpenTelemetryCmd) initializeMetricResources() (
 		resource, err := newOpenTelemetryMetricResource(
 			host,
 			port,
-			withServerEdition(BedrockEdition),
+			withServerEdition(utils.BedrockEdition),
 			withLogger(c.logger),
 		)
 		if err != nil {
