@@ -22,7 +22,7 @@ func Metrics() *serverMetrics {
 }
 
 func (m *serverMetrics) RecordHealth(healthy bool, attributes []attribute.KeyValue) {
-	_ = NewInt64ObservableGauge(
+	NewInt64ObservableGauge(
 		"minecraft_status_healthy",
 		"Indicates if the server is healthy (1) or not (0)",
 		func() int64 {
@@ -36,7 +36,7 @@ func (m *serverMetrics) RecordHealth(healthy bool, attributes []attribute.KeyVal
 }
 
 func (m *serverMetrics) RecordResponseTime(responseTime float64, attributes []attribute.KeyValue) {
-	_ = NewFloat64ObservableGauge(
+	NewFloat64ObservableGauge(
 		"minecraft_status_response_time",
 		"The response time of the server",
 		func() float64 {
@@ -47,7 +47,7 @@ func (m *serverMetrics) RecordResponseTime(responseTime float64, attributes []at
 }
 
 func (m *serverMetrics) RecordPlayersOnlineCount(playersOnlineCount int32, attributes []attribute.KeyValue) {
-	_ = NewInt64ObservableGauge(
+	NewInt64ObservableGauge(
 		"minecraft_status_players_online_count",
 		"The number of players currently online on the server",
 		func() int64 {
@@ -58,7 +58,7 @@ func (m *serverMetrics) RecordPlayersOnlineCount(playersOnlineCount int32, attri
 }
 
 func (m *serverMetrics) RecordPlayersMaxCount(playersMaxCount int32, attributes []attribute.KeyValue) {
-	_ = NewInt64ObservableGauge(
+	NewInt64ObservableGauge(
 		"minecraft_status_players_max_count",
 		"The maximum number of players that can be online on the server",
 		func() int64 {

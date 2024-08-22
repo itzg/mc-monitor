@@ -18,8 +18,8 @@ func NewInt64ObservableGauge(
 	description string,
 	callback func() int64,
 	attributes []attribute.KeyValue,
-) metric.Int64ObservableGauge {
-	counter, err := meter.Int64ObservableGauge(
+) {
+	_, err := meter.Int64ObservableGauge(
 		name,
 		metric.WithDescription(description),
 		metric.WithUnit("1"),
@@ -31,7 +31,7 @@ func NewInt64ObservableGauge(
 		),
 	)
 	handleError(fmt.Sprintf("Error creating %s metric", name), err)
-	return counter
+	return
 }
 
 func NewFloat64ObservableGauge(
@@ -39,8 +39,8 @@ func NewFloat64ObservableGauge(
 	description string,
 	callback func() float64,
 	attributes []attribute.KeyValue,
-) metric.Float64ObservableGauge {
-	counter, err := meter.Float64ObservableGauge(
+) {
+	_, err := meter.Float64ObservableGauge(
 		name,
 		metric.WithDescription(description),
 		metric.WithUnit("ms"),
@@ -52,7 +52,6 @@ func NewFloat64ObservableGauge(
 		),
 	)
 	handleError(fmt.Sprintf("Error creating %s metric", name), err)
-	return counter
 }
 
 func handleError(msg string, err error) {
