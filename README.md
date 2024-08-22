@@ -141,7 +141,7 @@ The `collect-otel` sub-command accepts the following arguments, which can also b
 ```
   -servers host:port
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
-  -bed-rock-servers host:port
+  -bedrock-servers host:port
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BED_ROCK_SERVERS)
   -interval duration
     	Collect and sends OpenTelemetry data at this interval (env EXPORT_INTERVAL) (default 10s)
