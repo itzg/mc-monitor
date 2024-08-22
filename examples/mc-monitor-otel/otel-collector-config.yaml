@@ -1,0 +1,31 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+
+exporters:
+  # In this case, we're creating a exporter for Prometheus.
+  # However, you can use any other exporter that you want: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    send_timestamps: true
+    metric_expiration: 180m
+    enable_open_metrics: true
+    add_metric_suffixes: false
+
+  debug:
+    # Available values: basic, normal and detailed
+    verbosity: basic
+
+service:
+  pipelines:
+    # For now, we want to export only metrics. In the future, maybe, we can export logs or even traces too.
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, prometheus]

@@ -22,6 +22,7 @@ Subcommands:
 Subcommands for monitoring:
 	export-for-prometheus  Registers an HTTP metrics endpoints for Prometheus export
 	gather-for-telegraf  Periodically gathers to status of one or more Minecraft servers and sends metrics to telegraf over TCP using Influx line protocol
+	collect-otel Periodically collects to status of one or more Minecraft servers and sends metrics to an OpenTelemetry Collector using the gRPC protocol
 
 Subcommands for status:
 	status           Retrieves and displays the status of the given Minecraft server
@@ -124,3 +125,43 @@ An example Docker composition is provided in [examples/mc-monitor-prom](examples
 
 ![Prometheus Chart](docs/prometheus_online_count_chart.png)
 
+
+
+### Monitoring a server with Open Telemetry
+
+Open Telemetry is a vendor-agnostic way to receive, process and export telemetry data. In this context, monitoring a Minecraft Server with Open Telemetry requires a running [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to receive the exported data. An example on how to initialize it can be found in [examples/mc-monitor-otel](examples/mc-monitor-otel).
+
+Once you run the mc-monitor application using the `collect-otel` subcommand, mc-monitor will create the necessary [instrumentation]
+(https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
+
+The Collector will receive and process the data, sending the metrics to any of the supported [backends](https://opentelemetry.io/docs/collector/configuration/#exporters). In our example, you will find the necessary configurations to export metrics through Prometheus.
+
+The `collect-otel` sub-command accepts the following arguments, which can also be viewed using `--help`:
+
+```
+  -servers host:port
+    	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
+  -bedrock-servers host:port
+    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BED_ROCK_SERVERS)
+  -interval duration
+    	Collect and sends OpenTelemetry data at this interval (env EXPORT_INTERVAL) (default 10s)
+
+  -otel-collector-endpoint string
+    	OpenTelemetry gRPC endpoint to export data (env EXPORT_OTEL_COLLECTOR_ENDPOINT) (default "localhost:4317")
+  -otel-collector-timeout duration
+    	Timeout for collecting OpenTelemetry data (env EXPORT_OTEL_COLLECTOR_TIMEOUT) (default 35s)
+```
+
+The following metrics are exported
+- `minecraft_status_healthy`
+- `minecraft_status_response_time_seconds`
+- `minecraft_status_players_online_count`
+- `minecraft_status_players_max_count`
+
+with the labels
+- `server_host`
+- `server_port`
+- `server_edition` : `java` or `bedrock`
+- `server_version`
+
+An example Docker composition is provided in [examples/mc-monitor-otel](examples/mc-monitor-otel).

@@ -4,12 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/google/subcommands"
-	"github.com/itzg/go-flagsfiller"
-	"github.com/itzg/zapconfigs"
-	"go.uber.org/zap"
 	"log"
 	"os"
+
+	"github.com/google/subcommands"
+	"github.com/itzg/go-flagsfiller"
+	"github.com/itzg/mc-monitor/otel"
+	"github.com/itzg/zapconfigs"
+	"go.uber.org/zap"
 )
 
 var (
@@ -26,6 +28,7 @@ func main() {
 	subcommands.Register(&statusBedrockCmd{}, "status")
 	subcommands.Register(&gatherTelegrafCmd{}, "monitoring")
 	subcommands.Register(&exportPrometheusCmd{}, "monitoring")
+	subcommands.Register(&otel.CollectOpenTelemetryCmd{}, "monitoring")
 
 	var config GlobalConfig
 	err := flagsfiller.Parse(&config, flagsfiller.WithEnv(""))
