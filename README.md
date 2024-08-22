@@ -22,8 +22,7 @@ Subcommands:
 Subcommands for monitoring:
 	export-for-prometheus  Registers an HTTP metrics endpoints for Prometheus export
 	gather-for-telegraf  Periodically gathers to status of one or more Minecraft servers and sends metrics to telegraf over TCP using Influx line protocol
-	collect-otel Periodically collects to status of one or more Minecraft servers and sends metrics to an OpenTelemetry 
-	Collector using the gRPC protocol
+	collect-otel Periodically collects to status of one or more Minecraft servers and sends metrics to an OpenTelemetry Collector using the gRPC protocol
 
 Subcommands for status:
 	status           Retrieves and displays the status of the given Minecraft server
