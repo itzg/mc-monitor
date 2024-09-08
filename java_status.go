@@ -32,6 +32,8 @@ type statusCmd struct {
 	UseProxy     bool `usage:"supports contacting Bungeecord when proxy_protocol enabled"`
 	ProxyVersion byte `usage:"version of PROXY protocol to use" default:"1"`
 
+	SkipReadinessCheck	bool `usage:"returns success when pinging a server without player info, or with a max player count of 0"`
+
 	ShowPlayerCount bool `usage:"show just the online player count"`
 }
 
@@ -90,7 +92,7 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 		// While server is starting up it will answer pings, but respond with empty JSON object.
 		// As such, we'll sanity check the max players value to see if a zero-value has been
 		// provided for info.
-		if info.Players.Max == 0 {
+		if info.Players.Max == 0 && !c.SkipReadinessCheck {
 
 			_, _ = fmt.Fprintf(os.Stderr, "server not ready %s:%d", c.Host, c.Port)
 			return errors.New("server not ready")
@@ -127,7 +129,7 @@ func (c *statusCmd) ExecuteServerListPing() subcommands.ExitStatus {
 			return err
 		}
 
-		if response.MaxPlayers == "0" {
+		if response.MaxPlayers == "0" && !c.SkipReadinessCheck {
 			return errors.New("server not ready")
 		}
 
@@ -176,7 +178,7 @@ func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus
 		response := hs.Properties.Infos()
 		logger.Debug("mcutils ping returned", zap.Any("properties", response))
 
-		if response.Players.Max == 0 {
+		if response.Players.Max == 0 && !c.SkipReadinessCheck {
 			return errors.New("server not ready")
 		}
 
