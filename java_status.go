@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -32,9 +33,10 @@ type statusCmd struct {
 	UseProxy     bool `usage:"supports contacting Bungeecord when proxy_protocol enabled"`
 	ProxyVersion byte `usage:"version of PROXY protocol to use" default:"1"`
 
-	SkipReadinessCheck	bool `usage:"returns success when pinging a server without player info, or with a max player count of 0"`
+	SkipReadinessCheck bool `usage:"returns success when pinging a server without player info, or with a max player count of 0"`
 
 	ShowPlayerCount bool `usage:"show just the online player count"`
+	Json            bool `usage:"output server status as JSON"`
 }
 
 func (c *statusCmd) Name() string {
@@ -55,6 +57,12 @@ func (c *statusCmd) SetFlags(flags *flag.FlagSet) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+type statusResult struct {
+	Host       string               `json:"host"`
+	Port       int                  `json:"port"`
+	ServerInfo *mcpinger.ServerInfo `json:"server_info"`
 }
 
 func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
@@ -98,7 +106,18 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 			return errors.New("server not ready")
 		}
 
-		if c.ShowPlayerCount {
+		if c.Json {
+			err := json.NewEncoder(os.Stdout).Encode(statusResult{
+				Host:       c.Host,
+				Port:       c.Port,
+				ServerInfo: info,
+			})
+
+			if err != nil {
+				logger.Error("failed to encode info", zap.Error(err))
+			}
+
+		} else if c.ShowPlayerCount {
 			fmt.Printf("%d\n", info.Players.Online)
 		} else {
 			fmt.Printf("%s:%d : version=%s online=%d max=%d motd='%s'\n",
