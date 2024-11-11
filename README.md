@@ -29,6 +29,91 @@ Subcommands for status:
 	status-bedrock   Retrieves and displays the status of the given Minecraft Bedrock Dedicated server
 ```
 
+Usage for any of the sub-commands can be displayed by add `--help` after each, such as:
+
+```shell
+mc-monitor status --help
+```
+
+### status
+
+```
+  -host string
+    	hostname of the Minecraft server (env MC_HOST) (default "localhost")
+  -json
+    	output server status as JSON
+  -port int
+    	port of the Minecraft server (env MC_PORT) (default 25565)
+  -retry-interval duration
+    	if retry-limit is non-zero, status will be retried at this interval (default 10s)
+  -retry-limit int
+    	if non-zero, failed status will be retried this many times before exiting
+  -show-player-count
+    	show just the online player count
+  -skip-readiness-check
+    	returns success when pinging a server without player info, or with a max player count of 0
+  -timeout duration
+    	the timeout the ping can take as a maximum (default 15s)
+  -use-mc-utils
+    	(experimental) try using mcutils to query the server
+  -use-proxy
+    	supports contacting Bungeecord when proxy_protocol enabled
+  -use-server-list-ping
+    	indicates the legacy, server list ping should be used for pre-1.12
+```
+
+### status-bedrock
+
+```
+  -host string
+    	 (default "localhost")
+  -port int
+    	 (default 19132)
+  -retry-interval duration
+    	if retry-limit is non-zero, status will be retried at this interval (default 10s)
+  -retry-limit int
+    	if non-zero, failed status will be retried this many times before exiting
+```
+
+### export-for-prometheus
+
+```
+  -bedrock-servers host:port
+    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
+  -port int
+    	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
+  -servers host:port
+    	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
+  -timeout duration
+    	timeout when checking each servers (env TIMEOUT) (default 1m0s)
+```
+
+### gather-for-telegraf
+
+```
+  -interval duration
+    	gathers and sends metrics at this interval (env GATHER_INTERVAL) (default 1m0s)
+  -servers host:port
+    	one or more host:port addresses of servers to monitor (env GATHER_SERVERS)
+  -telegraf-address host:port
+    	host:port of telegraf accepting Influx line protocol (env GATHER_TELEGRAF_ADDRESS) (default "localhost:8094")
+```
+
+### collect-otel
+
+```
+  -bedrock-servers host:port
+    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
+  -interval duration
+    	Collect and sends OpenTelemetry data at this interval (env EXPORT_INTERVAL) (default 10s)
+  -otel-collector-endpoint string
+    	OpenTelemetry gRPC endpoint to export data (env EXPORT_OTEL_COLLECTOR_ENDPOINT) (default "localhost:4317")
+  -otel-collector-timeout duration
+    	Timeout for collecting OpenTelemetry data (env EXPORT_OTEL_COLLECTOR_TIMEOUT) (default 35s)
+  -servers host:port
+    	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
+```
+
 ## Examples
 
 ### Checking the status of a server
