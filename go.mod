@@ -2,7 +2,7 @@ module github.com/itzg/mc-monitor
 
 go 1.23
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	github.com/Raqbit/mc-pinger v0.2.4
