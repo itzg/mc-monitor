@@ -27,10 +27,7 @@
   "liveNow": false,
   "panels": [
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "datasource": "Prometheus",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -97,10 +94,7 @@
       "pluginVersion": "8.3.3",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
+          "datasource": "Prometheus",
           "exemplar": true,
           "expr": "minecraft_status_healthy{server_host=\"$server\",server_version=~\".+\"}",
           "interval": "",
@@ -112,10 +106,7 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "datasource": "Prometheus",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -213,10 +204,7 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
+          "datasource": "Prometheus",
           "exemplar": true,
           "expr": "minecraft_status_players_online_count{server_host=\"$server\"}",
           "interval": "",
@@ -224,10 +212,7 @@
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
+          "datasource": "Prometheus",
           "exemplar": true,
           "expr": "minecraft_status_players_max_count{server_host=\"$server\"}",
           "hide": false,
@@ -240,10 +225,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -314,10 +296,7 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
+          "datasource": "Prometheus",
           "exemplar": true,
           "expr": "rate(container_cpu_user_seconds_total{container_label_com_docker_compose_service=\"$server\"}[$__rate_interval])",
           "format": "time_series",
@@ -330,10 +309,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -404,10 +380,7 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
+          "datasource": "Prometheus",
           "exemplar": true,
           "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=\"$server\"}",
           "format": "time_series",
@@ -432,10 +405,7 @@
           "text": "mc",
           "value": "mc"
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
+        "datasource": "Prometheus",
         "definition": "label_values(server_host)",
         "hide": 0,
         "includeAll": false,
