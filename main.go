@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
@@ -56,7 +58,20 @@ func main() {
 	}
 	defer logger.Sync()
 
-	os.Exit(int(subcommands.Execute(context.Background(), logger)))
+	ctx, cancel := context.WithCancel(context.Background())
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(
+		sigc,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
+	go func() {
+		<-sigc
+		cancel()
+	}()
+
+	os.Exit(int(subcommands.Execute(ctx, logger)))
 }
 
 type GlobalConfig struct {
