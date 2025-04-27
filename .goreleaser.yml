@@ -77,6 +77,7 @@ scoops:
       owner: itzg
       name: scoop-bucket
       token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
+    directory: bucket
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
 brews:
