@@ -1,3 +1,5 @@
+version: 2
+
 project_name: mc-monitor
 before:
   hooks:
@@ -18,11 +20,6 @@ builds:
   ignore:
     - goos: windows
       goarch: arm
-archives:
-  -
-    format_overrides:
-      - goos: windows
-        format: zip
 dockers:
   - image_templates:
       -  itzg/{{ .ProjectName }}:{{ .Version }}-amd64
@@ -67,8 +64,6 @@ docker_manifests:
       -  itzg/{{ .ProjectName }}:{{ .Version }}-arm32v7
 checksum:
   name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
@@ -82,7 +77,6 @@ scoops:
       owner: itzg
       name: scoop-bucket
       token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
-    folder: bucket
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
 brews:
