@@ -162,6 +162,7 @@ func (c *CollectOpenTelemetryCmd) initializeMetricResources() (
 			host,
 			port,
 			withServerEdition(utils.JavaEdition),
+			withServerMetrics(c.logger),
 			withLogger(c.logger),
 		)
 		if err != nil {
