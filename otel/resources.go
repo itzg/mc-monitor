@@ -18,6 +18,7 @@ type OpenTelemetryMetricResource struct {
 	port    uint16
 	edition utils.ServerEdition
 	pinger  mcpinger.Pinger
+	metrics *ServerMetrics
 	logger  *zap.Logger
 }
 
@@ -26,6 +27,12 @@ type OpenTelemetryMetricResourceOptions func(r *OpenTelemetryMetricResource)
 func withServerEdition(edition utils.ServerEdition) OpenTelemetryMetricResourceOptions {
 	return func(r *OpenTelemetryMetricResource) {
 		r.edition = edition
+	}
+}
+
+func withServerMetrics(logger *zap.Logger) OpenTelemetryMetricResourceOptions {
+	return func(r *OpenTelemetryMetricResource) {
+		r.metrics = NewServerMetrics(logger)
 	}
 }
 
@@ -57,13 +64,18 @@ func (r *OpenTelemetryMetricResource) Execute() {
 	startTime := time.Now()
 	info, err := r.pinger.Ping()
 	elapsed := time.Now().Sub(startTime)
-	if err != nil || info.Players.Max == 0 {
-		Metrics().RecordHealth(false, buildMetricAttributes(r.host, r.port, r.edition, ""))
-		return
-	}
+	r.logger.Debug("ping returned", zap.Error(err), zap.Any("info", info))
+	r.logger.Debug("measured elapsed time", zap.Float64("elapsed", elapsed.Seconds()))
 
-	Metrics().RecordResponseTime(elapsed.Seconds(), buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordHealth(true, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordPlayersOnlineCount(info.Players.Online, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
-	Metrics().RecordPlayersMaxCount(info.Players.Max, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	if r.metrics != nil {
+		if err != nil || info.Players.Max == 0 {
+			r.metrics.RecordHealth(false, buildMetricAttributes(r.host, r.port, r.edition, ""))
+			return
+		}
+
+		r.metrics.RecordResponseTime(elapsed.Seconds(), buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+		r.metrics.RecordHealth(true, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+		r.metrics.RecordPlayersOnlineCount(info.Players.Online, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+		r.metrics.RecordPlayersMaxCount(info.Players.Max, buildMetricAttributes(r.host, r.port, r.edition, info.Version.Name))
+	}
 }
