@@ -1,5 +1,6 @@
-// Package slp implements the Server List Ping protocol originally accepted by servers
+// Package slp implements the Server List Ping and Old Server List Ping protocol originally accepted by servers
 // before 1.6; however, modern servers also respond to it.
+// Old Server List Ping is used for pre-1.3 versions
 package slp
 
 import (
