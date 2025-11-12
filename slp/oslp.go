@@ -54,6 +54,10 @@ func OldServerListPing(host string, port int, timeout time.Duration) (*OldServer
 	}
 
 	responseSplit := strings.Split(serverResponse, "§")
+
+	if len(responseSplit) < 3 {
+		return nil, fmt.Errorf("invalid server response, expected at least 3 parts separated by '§', got %d: %q", len(responseSplit), serverResponse)
+	}
 	messageOfTheDay := responseSplit[0]
 	currentPlayerCount := responseSplit[1]
 	maxPlayers := responseSplit[2]
