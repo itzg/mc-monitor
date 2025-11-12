@@ -24,6 +24,7 @@ type statusCmd struct {
 	Port int    `default:"25565" usage:"port of the Minecraft server" env:"MC_PORT"`
 
 	UseServerListPing bool `usage:"indicates the legacy, server list ping should be used for pre-1.12"`
+	UseOldServerListPing bool `usage:"indicates older legacy, old server list ping is used for b1.8 to 1.3"`
 	UseMcUtils        bool `usage:"(experimental) try using mcutils to query the server"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
@@ -70,6 +71,10 @@ func (c *statusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interfac
 
 	if c.UseServerListPing {
 		return c.ExecuteServerListPing()
+	}
+
+	if c.UseOldServerListPing {
+		return c.ExecuteOldServerListPing()
 	}
 
 	if c.UseMcUtils {
@@ -158,6 +163,38 @@ func (c *statusCmd) ExecuteServerListPing() subcommands.ExitStatus {
 			fmt.Printf("%s:%d : version=%s online=%s max=%s motd='%s'\n",
 				c.Host, c.Port,
 				response.ServerVersion, response.CurrentPlayerCount, response.MaxPlayers, response.MessageOfTheDay)
+		}
+
+		return nil
+	}, retry.Delay(c.RetryInterval), retry.DelayType(retry.FixedDelay), retry.Attempts(uint(c.RetryLimit+1)))
+
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to ping %s:%d : %s", c.Host, c.Port, err)
+		return subcommands.ExitFailure
+	}
+
+	// regular output is within Do function
+	return subcommands.ExitSuccess
+}
+
+
+func (c *statusCmd) ExecuteOldServerListPing() subcommands.ExitStatus {
+	err := retry.Do(func() error {
+		response, err := slp.OldServerListPing(c.Host, c.Port, c.Timeout)
+		if err != nil {
+			return err
+		}
+
+		if response.MaxPlayers == "0" && !c.SkipReadinessCheck {
+			return errors.New("server not ready")
+		}
+
+		if c.ShowPlayerCount {
+			fmt.Printf("%s\n", response.CurrentPlayerCount)
+		} else {
+			fmt.Printf("%s:%d : online=%s max=%s motd='%s'\n",
+				c.Host, c.Port,
+				response.CurrentPlayerCount, response.MaxPlayers, response.MessageOfTheDay)
 		}
 
 		return nil
