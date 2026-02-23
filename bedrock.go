@@ -42,11 +42,10 @@ func PingBedrockServer(address string, timeout time.Duration) (*BedrockServerInf
 		Version:         parts[3],
 		Players:         safeParseInt(parts[4]),
 		MaxPlayers:      safeParseInt(parts[5]),
-		LevelName:       parts[7],
-		GameMode:        parts[8],
 	}
-	if len(parts) >= 10 {
-		info.Difficulty = parts[9]
+	if len(parts) > 7 {
+		info.LevelName = parts[7]
+		info.GameMode = parts[8]
 	}
 
 	return info, nil
