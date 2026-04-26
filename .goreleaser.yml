@@ -72,6 +72,8 @@ changelog:
     - '^test:'
     - '^ci:'
     - '^misc:'
+release:
+  replace_existing_artifacts: true
 scoops:
   - repository:
       owner: itzg
