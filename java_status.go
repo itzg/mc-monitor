@@ -214,7 +214,7 @@ func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus
 	client := ping.NewClient(c.Host, c.Port)
 	client.DialTimeout = c.Timeout
 	client.ReadTimeout = c.Timeout
-	if net.ParseIP(c.Host) != nil {
+	if net.ParseIP(c.Host) != nil || c.Host == "localhost" {
 		client.SkipSRVLookup = true
 	}
 
