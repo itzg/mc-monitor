@@ -6,12 +6,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
+	"net"
+	"os"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/itzg/mc-monitor/slp"
 	"go.uber.org/zap"
-	"log"
-	"os"
-	"time"
 
 	mcpinger "github.com/Raqbit/mc-pinger"
 	"github.com/google/subcommands"
@@ -23,9 +25,9 @@ type statusCmd struct {
 	Host string `default:"localhost" usage:"hostname of the Minecraft server" env:"MC_HOST"`
 	Port int    `default:"25565" usage:"port of the Minecraft server" env:"MC_PORT"`
 
-	UseServerListPing bool `usage:"indicates the legacy, server list ping should be used for pre-1.12"`
+	UseServerListPing    bool `usage:"indicates the legacy, server list ping should be used for pre-1.12"`
 	UseOldServerListPing bool `usage:"indicates older legacy, old server list ping is used for b1.8 to 1.3"`
-	UseMcUtils        bool `usage:"(experimental) try using mcutils to query the server"`
+	UseMcUtils           bool `usage:"(experimental) try using mcutils to query the server"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
@@ -177,7 +179,6 @@ func (c *statusCmd) ExecuteServerListPing() subcommands.ExitStatus {
 	return subcommands.ExitSuccess
 }
 
-
 func (c *statusCmd) ExecuteOldServerListPing() subcommands.ExitStatus {
 	err := retry.Do(func() error {
 		response, err := slp.OldServerListPing(c.Host, c.Port, c.Timeout)
@@ -213,6 +214,9 @@ func (c *statusCmd) ExecuteMcUtilPing(logger *zap.Logger) subcommands.ExitStatus
 	client := ping.NewClient(c.Host, c.Port)
 	client.DialTimeout = c.Timeout
 	client.ReadTimeout = c.Timeout
+	if net.ParseIP(c.Host) != nil || c.Host == "localhost" {
+		client.SkipSRVLookup = true
+	}
 
 	err := retry.Do(func() error {
 
