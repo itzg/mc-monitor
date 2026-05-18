@@ -15,11 +15,16 @@ builds:
     - amd64
     - arm
     - arm64
+    - riscv64
   goarm:
     - "7"
   ignore:
     - goos: windows
       goarch: arm
+    - goos: windows
+      goarch: riscv64
+    - goos: darwin
+      goarch: riscv64
 dockers:
   - image_templates:
       -  itzg/{{ .ProjectName }}:{{ .Version }}-amd64
