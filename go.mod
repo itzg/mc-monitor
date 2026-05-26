@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/sandertv/go-raknet v1.15.0
 	github.com/stretchr/testify v1.11.1
-	github.com/xrjr/mcutils v1.6.0
+	github.com/xrjr/mcutils v1.6.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.68.0
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.43.0
