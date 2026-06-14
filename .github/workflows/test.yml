@@ -2,11 +2,13 @@ name: Test
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
     paths-ignore:
       - README.md
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
   schedule:
     - cron: 0 4 * * SUN
 
