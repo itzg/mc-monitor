@@ -4,8 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
+	"go.uber.org/zap"
+
 	"log"
 	"net"
 	"strconv"
@@ -40,21 +43,22 @@ func (c *statusBedrockCmd) SetFlags(flags *flag.FlagSet) {
 	}
 }
 
-func (c *statusBedrockCmd) Execute(ctx context.Context, f *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+	logger := args[0].(*zap.Logger)
 	address := net.JoinHostPort(c.Host, strconv.Itoa(c.Port))
 	if c.RetryInterval <= 0 {
 		c.RetryInterval = 1 * time.Second
 	}
 
 	for {
-		info, err := PingBedrockServer(address, 0)
+		info, err := PingBedrockServer(address, 0, logger)
 		if err != nil {
 			if c.RetryLimit > 0 {
 				c.RetryLimit--
 				time.Sleep(c.RetryInterval)
 				continue
 			}
-			log.Fatal(err)
+			logger.Fatal("Failed to ping Bedrock server", zap.Error(err))
 			return subcommands.ExitFailure
 		}
 

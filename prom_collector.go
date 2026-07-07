@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	mcpinger "github.com/Raqbit/mc-pinger"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
 	"net"
 	"strconv"
 	"time"
+
+	mcpinger "github.com/Raqbit/mc-pinger"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 )
 
 const (
@@ -202,7 +203,7 @@ func newPromBedrockCollector(host string, port uint16, logger *zap.Logger) *prom
 func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", strconv.Itoa(int(c.port))))
 
-	info, err := PingBedrockServer(net.JoinHostPort(c.host, strconv.Itoa(int(c.port))), c.timeout)
+	info, err := PingBedrockServer(net.JoinHostPort(c.host, strconv.Itoa(int(c.port))), c.timeout, c.logger)
 	if err != nil {
 		c.sendMetric(metrics, promDescHealthy, "", 0)
 	} else {
