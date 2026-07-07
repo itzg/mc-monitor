@@ -38,12 +38,16 @@ func PingBedrockServer(address string, timeout time.Duration, logger *zap.Logger
 	}
 
 	logger.Debug("received response from bedrock server", zap.String("address", address), zap.ByteString("response", response))
+	if len(response) == 0 {
+		return nil, fmt.Errorf("empty response from bedrock server %s", address)
+	}
+
 	parts := strings.Split(string(response), ";")
 	info := &BedrockServerInfo{
 		Rtt:             rtt,
-		ServerName:      parts[1],
-		ProtocolVersion: parts[2],
-		Version:         parts[3],
+		ServerName:      safeStringAt(parts, 1),
+		ProtocolVersion: safeStringAt(parts, 2),
+		Version:         safeStringAt(parts, 3),
 		// the parts past here are not always present in the response
 		Players:    safeIntAt(parts, 4),
 		MaxPlayers: safeIntAt(parts, 5),
