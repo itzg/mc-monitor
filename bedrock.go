@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/sandertv/go-raknet"
+	"go.uber.org/zap"
+
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +23,7 @@ type BedrockServerInfo struct {
 	Rtt             time.Duration
 }
 
-func PingBedrockServer(address string, timeout time.Duration) (*BedrockServerInfo, error) {
+func PingBedrockServer(address string, timeout time.Duration, logger *zap.Logger) (*BedrockServerInfo, error) {
 	start := time.Now()
 	var response []byte
 	var err error
@@ -34,22 +37,36 @@ func PingBedrockServer(address string, timeout time.Duration) (*BedrockServerInf
 		return nil, fmt.Errorf("failed to query bedrock server %s: %w", address, err)
 	}
 
+	logger.Debug("received response from bedrock server", zap.String("address", address), zap.ByteString("response", response))
 	parts := strings.Split(string(response), ";")
 	info := &BedrockServerInfo{
 		Rtt:             rtt,
 		ServerName:      parts[1],
 		ProtocolVersion: parts[2],
 		Version:         parts[3],
-		Players:         safeParseInt(parts[4]),
-		MaxPlayers:      safeParseInt(parts[5]),
-		LevelName:       parts[7],
-		GameMode:        parts[8],
-	}
-	if len(parts) >= 10 {
-		info.Difficulty = parts[9]
+		// the parts past here are not always present in the response
+		Players:    safeIntAt(parts, 4),
+		MaxPlayers: safeIntAt(parts, 5),
+		LevelName:  safeStringAt(parts, 7),
+		GameMode:   safeStringAt(parts, 8),
+		Difficulty: safeStringAt(parts, 9),
 	}
 
 	return info, nil
+}
+
+func safeStringAt(parts []string, index int) string {
+	if index >= 0 && index < len(parts) {
+		return parts[index]
+	}
+	return ""
+}
+
+func safeIntAt(parts []string, index int) int {
+	if index >= 0 && index < len(parts) {
+		return safeParseInt(parts[index])
+	}
+	return -1
 }
 
 func safeParseInt(s string) int {
