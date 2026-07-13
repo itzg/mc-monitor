@@ -6,7 +6,7 @@ require (
 	github.com/Raqbit/mc-pinger v0.2.4
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/google/subcommands v1.2.0
-	github.com/itzg/go-flagsfiller v1.18.0
+	github.com/itzg/go-flagsfiller v1.19.0
 	github.com/itzg/line-protocol-sender v0.1.1
 	github.com/itzg/zapconfigs v0.1.0
 	github.com/prometheus/client_golang v1.23.2
