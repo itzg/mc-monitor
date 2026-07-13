@@ -37,6 +37,8 @@ github.com/itzg/go-flagsfiller v1.17.0 h1:Zkg+qsbB24Msu78l+1aqzXAIEKEeLRzAiK7DN4
 github.com/itzg/go-flagsfiller v1.17.0/go.mod h1:ub1t7dNqIj57TWKUtEqfopXg0xKbBgd9JVuCLmelwNo=
 github.com/itzg/go-flagsfiller v1.18.0 h1:dSxUZcvYQg5XKJ1bhZX7rLIQcz2mzlKNVZYXrvJrBAY=
 github.com/itzg/go-flagsfiller v1.18.0/go.mod h1:Zq4PnNALfrY73hVPlg7GExLxm3lVRu90895WVe8NQVg=
+github.com/itzg/go-flagsfiller v1.19.0 h1:CiT97rDZJrRvWoiVzbx/mRM+/fn+GQ6cRMMa/x3psBs=
+github.com/itzg/go-flagsfiller v1.19.0/go.mod h1:Zq4PnNALfrY73hVPlg7GExLxm3lVRu90895WVe8NQVg=
 github.com/itzg/line-protocol-sender v0.1.1 h1:UA01VBt3/whRxpwO425w60pdNmgjnGV1tseR4qh6mC0=
 github.com/itzg/line-protocol-sender v0.1.1/go.mod h1:Cd948iZ7YibnGcLt5D/11RfKmteh8lQyXpGUbY97WBw=
 github.com/itzg/zapconfigs v0.1.0 h1:Gokocm8VaTNnZjvIiVA5NEhzZ1v7lEyXY/AbeBmq6YQ=
