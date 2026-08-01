@@ -21,6 +21,8 @@ type exportPrometheusCmd struct {
 	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
 	Port           int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
 	Timeout        time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
+	UseProxy       bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
+	ProxyVersion   uint          `usage:"version of PROXY protocol to use" default:"1"`
 	logger         *zap.Logger
 }
 
@@ -52,7 +54,7 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 
 	logger := args[0].(*zap.Logger)
 
-	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, logger)
+	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, c.UseProxy, c.ProxyVersion, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
