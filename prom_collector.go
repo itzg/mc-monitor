@@ -38,13 +38,23 @@ type pingOptions interface {
 	GetHost() string
 	GetPort() uint16
 	GetTimeout() time.Duration
+	GetUseProxy() bool
+	GetProxyVersion() byte
 }
 
-func pingJavaServer(opt pingOptions) (*mcpinger.ServerInfo, error) {
+func javaPingerOptions(opt pingOptions) []mcpinger.McPingerOption {
 	var opts []mcpinger.McPingerOption
 	if t := opt.GetTimeout(); t > 0 {
 		opts = append(opts, mcpinger.WithTimeout(t))
 	}
+	if opt.GetUseProxy() {
+		opts = append(opts, mcpinger.WithProxyProto(opt.GetProxyVersion()))
+	}
+	return opts
+}
+
+func pingJavaServer(opt pingOptions) (*mcpinger.ServerInfo, error) {
+	opts := javaPingerOptions(opt)
 	pinger := mcpinger.New(opt.GetHost(), opt.GetPort(), opts...)
 	return pinger.Ping()
 }
@@ -69,16 +79,20 @@ func (c promCollectors) Collect(metrics chan<- prometheus.Metric) {
 	}
 }
 
-func newPromCollectors(servers []string, bedrockServers []string, logger *zap.Logger) (promCollectors, error) {
+func newPromCollectors(servers []string, bedrockServers []string, useProxy bool, proxyVersion uint, logger *zap.Logger) (promCollectors, error) {
 	var collectors []specificPromCollector
 
-	javaCollectors, err := createPromCollectors(servers, JavaEdition, logger)
+	if useProxy && proxyVersion != 1 && proxyVersion != 2 {
+		return nil, fmt.Errorf("proxy version must be 1 or 2")
+	}
+
+	javaCollectors, err := createPromCollectors(servers, JavaEdition, useProxy, byte(proxyVersion), logger)
 	if err != nil {
 		return nil, err
 	}
 	collectors = append(collectors, javaCollectors...)
 
-	bedrockCollectors, err := createPromCollectors(bedrockServers, BedrockEdition, logger)
+	bedrockCollectors, err := createPromCollectors(bedrockServers, BedrockEdition, false, 0, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +101,7 @@ func newPromCollectors(servers []string, bedrockServers []string, logger *zap.Lo
 	return collectors, nil
 }
 
-func createPromCollectors(servers []string, edition ServerEdition, logger *zap.Logger) (collectors []specificPromCollector, err error) {
+func createPromCollectors(servers []string, edition ServerEdition, useProxy bool, proxyVersion byte, logger *zap.Logger) (collectors []specificPromCollector, err error) {
 	for _, server := range servers {
 		switch edition {
 
@@ -96,7 +110,7 @@ func createPromCollectors(servers []string, edition ServerEdition, logger *zap.L
 			if err != nil {
 				return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
 			}
-			collectors = append(collectors, newPromJavaCollector(host, port, logger))
+			collectors = append(collectors, newPromJavaCollector(host, port, useProxy, proxyVersion, logger))
 
 		case BedrockEdition:
 			host, port, err := SplitHostPort(server, DefaultBedrockPort)
@@ -109,19 +123,23 @@ func createPromCollectors(servers []string, edition ServerEdition, logger *zap.L
 	return
 }
 
-func newPromJavaCollector(host string, port uint16, logger *zap.Logger) specificPromCollector {
+func newPromJavaCollector(host string, port uint16, useProxy bool, proxyVersion byte, logger *zap.Logger) specificPromCollector {
 	return &promJavaCollector{
-		host:   host,
-		port:   port,
-		logger: logger,
+		host:         host,
+		port:         port,
+		logger:       logger,
+		useProxy:     useProxy,
+		proxyVersion: proxyVersion,
 	}
 }
 
 type promJavaCollector struct {
-	host    string
-	port    uint16
-	logger  *zap.Logger
-	timeout time.Duration
+	host         string
+	port         uint16
+	logger       *zap.Logger
+	timeout      time.Duration
+	useProxy     bool
+	proxyVersion byte
 }
 
 func (c *promJavaCollector) GetHost() string {
@@ -134,6 +152,14 @@ func (c *promJavaCollector) GetPort() uint16 {
 
 func (c *promJavaCollector) GetTimeout() time.Duration {
 	return c.timeout
+}
+
+func (c *promJavaCollector) GetUseProxy() bool {
+	return c.useProxy
+}
+
+func (c *promJavaCollector) GetProxyVersion() byte {
+	return c.proxyVersion
 }
 
 func (c *promJavaCollector) SetTimeout(t time.Duration) {

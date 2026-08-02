@@ -82,10 +82,14 @@ mc-monitor status --help
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
   -port int
     	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
+  -proxy-version uint
+        version of PROXY protocol to use (env EXPORT_PROXY_VERSION) (default 1)
   -servers host:port
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -timeout duration
     	timeout when checking each servers (env TIMEOUT) (default 1m0s)
+  -use-proxy
+        supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
 ```
 
 ### gather-for-telegraf
@@ -190,8 +194,14 @@ The sub-command accepts the following arguments, which can also be viewed using 
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
   -port int
     	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
+  -proxy-version uint
+        version of PROXY protocol to use (env EXPORT_PROXY_VERSION) (default 1)
   -servers host:port
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
+  -timeout duration
+        timeout when checking each servers (env TIMEOUT) (default 1m0s)
+  -use-proxy
+        supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
 ```
 
 The following metrics are exported
