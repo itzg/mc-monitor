@@ -8,6 +8,10 @@
     {
       "matchManagers": ["gomod"],
       "addLabels": ["go"]
+    },
+    {
+      "matchDatasources": ["golang-version"],
+      "rangeStrategy": "bump"
     }
   ]
 }
