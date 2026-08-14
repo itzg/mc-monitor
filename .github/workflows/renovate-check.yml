@@ -23,4 +23,4 @@ jobs:
           node-version: '24'
           
       - name: Validate Renovate Configuration
-        run: npx --yes --package renovate@latest -- renovate-config-validator {.,.github/}renovate.json* --strict
+        run: npx --yes --package renovate@latest -- renovate-config-validator --strict
