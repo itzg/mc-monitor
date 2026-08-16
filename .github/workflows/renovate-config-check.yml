@@ -1,0 +1,13 @@
+name: Validate Renovate Config
+
+on:
+  push:
+    paths:
+      - 'renovate.json'
+  pull_request:
+    paths:
+      - 'renovate.json'
+
+jobs:
+  validate:
+    uses: itzg/github-workflows/.github/workflows/renovate-check.yml@main
