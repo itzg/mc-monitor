@@ -8,6 +8,11 @@
     {
       "matchManagers": ["gomod"],
       "addLabels": ["go"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["golang"],
+      "enabled": true
     }
   ]
 }
