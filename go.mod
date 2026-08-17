@@ -11,7 +11,7 @@ require (
 	github.com/itzg/zapconfigs v0.1.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/sandertv/go-raknet v1.15.1
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/xrjr/mcutils v1.6.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.70.0
 	go.opentelemetry.io/otel v1.45.0
