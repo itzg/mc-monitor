@@ -46,7 +46,7 @@ func (c *exportPrometheusCmd) SetFlags(f *flag.FlagSet) {
 	}
 }
 
-func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 	if (len(c.Servers) + len(c.BedrockServers)) == 0 {
 		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
@@ -75,9 +75,32 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 		zap.String("path", promExportPath),
 	)
 
-	http.Handle(promExportPath, promhttp.Handler())
-	log.Fatal(http.ListenAndServe(exportAddress, nil))
+	mux := http.NewServeMux()
+	mux.Handle(promExportPath, promhttp.Handler())
+	server := &http.Server{Addr: exportAddress, Handler: mux}
 
-	// never actually returns from ListenAndServe, so just satisfy return value
-	return subcommands.ExitFailure
+	serveErr := make(chan error, 1)
+	go func() {
+		serveErr <- server.ListenAndServe()
+	}()
+
+	select {
+	case <-ctx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			logger.Error("failed to cleanly shut down metrics server", zap.Error(err))
+			return subcommands.ExitFailure
+		}
+
+		return subcommands.ExitSuccess
+
+	case err := <-serveErr:
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+
+		return subcommands.ExitSuccess
+	}
 }
