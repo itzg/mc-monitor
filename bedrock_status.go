@@ -12,12 +12,15 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type statusBedrockCmd struct {
 	Host string `default:"localhost"`
 	Port int    `default:"19132"`
+
+	Protocol string `usage:"protocol to use: auto, nethernet, or raknet" default:"auto"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
@@ -51,7 +54,24 @@ func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...i
 	}
 
 	for {
-		info, err := PingBedrockServer(address, 0, logger)
+		var info *BedrockServerInfo
+		var err error
+		switch strings.ToLower(c.Protocol) {
+		case "nethernet":
+			info, err = PingBedrockNetherNet(address, 0, logger)
+		case "raknet":
+			info, err = PingBedrockServer(address, 0, logger)
+		case "auto", "":
+			info, err = PingBedrockNetherNet(address, 3*time.Second, logger)
+			if err != nil {
+				logger.Debug("NetherNet probe failed, falling back to RakNet", zap.Error(err))
+				info, err = PingBedrockServer(address, 0, logger)
+			}
+		default:
+			logger.Fatal("Unknown protocol", zap.String("protocol", c.Protocol))
+			return subcommands.ExitUsageError
+		}
+
 		if err != nil {
 			if c.RetryLimit > 0 {
 				c.RetryLimit--
@@ -68,5 +88,4 @@ func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...i
 
 		return subcommands.ExitSuccess
 	}
-
 }

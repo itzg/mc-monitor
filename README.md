@@ -1,4 +1,3 @@
-
 [![Docker Pulls](https://img.shields.io/docker/pulls/itzg/mc-monitor)](https://hub.docker.com/r/itzg/mc-monitor)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/itzg/mc-monitor)](https://github.com/itzg/mc-monitor/releases/latest)
 [![Test](https://github.com/itzg/mc-monitor/actions/workflows/test.yml/badge.svg)](https://github.com/itzg/mc-monitor/actions/workflows/test.yml)
@@ -7,13 +6,17 @@ Command/agent to monitor the status of Minecraft servers
 
 ## Install module
 
-```
-go get github.com/itzg/go-mc-status
+```shell
+go install github.com/itzg/mc-monitor@latest
 ```
 
 ## Usage
 
 ```
+Top-level flags:
+  -debug
+    	enable debug logging (env DEBUG)
+
 Subcommands:
 	flags            describe all known top-level flags
 	help             describe subcommands and their syntax
@@ -56,6 +59,8 @@ mc-monitor status --help
     	the timeout the ping can take as a maximum (default 15s)
   -use-mc-utils
     	(experimental) try using mcutils to query the server
+  -use-old-server-list-ping
+    	indicates older legacy, old server list ping is used for b1.8 to 1.3
   -use-proxy
     	supports contacting Bungeecord when proxy_protocol enabled
   -use-server-list-ping
@@ -69,11 +74,23 @@ mc-monitor status --help
     	 (default "localhost")
   -port int
     	 (default 19132)
+  -protocol string
+    	protocol to use: auto, nethernet, or raknet (default "auto")
   -retry-interval duration
     	if retry-limit is non-zero, status will be retried at this interval (default 10s)
   -retry-limit int
     	if non-zero, failed status will be retried this many times before exiting
 ```
+
+**Protocol selection:**
+
+Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP protocol to the NetherNet (WebRTC/HTTP) transport protocol. Starting from version **1.26.60 and newer**, NetherNet will be the only option. For earlier versions supporting both (such as 1.26.5x), protocol support depends on the `transport` setting configured on the server (`transport=nethernet` vs `transport=raknet` in `server.properties`).
+
+| Protocol    | When to use                                                                                                      |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| `auto`      | Default. Tries NetherNet first (HTTP `GET /v1/join`), falling back to RakNet (UDP) on error or timeout (3s).     |
+| `nethernet` | Bedrock 1.26.60 and newer (where NetherNet is the only option) or servers configured with `transport=nethernet`. |
+| `raknet`    | Bedrock 1.26.5X and older servers configured with `transport=raknet` (legacy RakNet UDP protocol).               |
 
 ### export-for-prometheus
 
@@ -124,14 +141,20 @@ mc-monitor status --help
 
 To check the status of a Java edition server:
 
-```
+```shell
 docker run -it --rm itzg/mc-monitor status --host mc.hypixel.net
 ```
 
-To check the status of a Bedrock Dedicated server:
+To check the status of a Bedrock Dedicated server (using auto protocol detection):
 
-```
+```shell
 docker run -it --rm itzg/mc-monitor status-bedrock --host play.fallentech.io
+```
+
+Or explicitly specifying the protocol:
+
+```shell
+docker run -it --rm itzg/mc-monitor status-bedrock --host play.fallentech.io --protocol nethernet
 ```
 
 where exit code will be 0 for success or 1 for failure.
@@ -139,6 +162,7 @@ where exit code will be 0 for success or 1 for failure.
 ### Workarounds for some status errors
 
 Some Forge servers may cause a `string length out of bounds` error during status messages due to how the [FML2 protocol](https://wiki.vg/Minecraft_Forge_Handshake#FML2_protocol_.281.13_-_Current.29) bundles the entire modlist for client compatibility check. If there are issues with `status` failing when it otherwise should work, you can try out the experimental `--use-mc-utils` flag below (enables the [mcutils](https://github.com/xrjr/mcutils) protocol library):
+
 ```
 docker run -it --rm itzg/mc-monitor status --use-mc-utils --host play.fallentech.io
 ```
@@ -160,13 +184,13 @@ Given the telegraf config file:
 ...and a Docker composition of telegraf and mc-monitor services:
 
 ```yaml
-version: '3'
+version: "3"
 
 services:
   telegraf:
     image: telegraf:1.13
     volumes:
-    - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
   monitor:
     image: itzg/mc-monitor
     command: gather-for-telegraf
@@ -189,6 +213,7 @@ minecraft_status,host=mc.hypixel.net,port=25565,status=success response_time=0.2
 When using the `export-for-prometheus` subcommand, mc-monitor will serve a Prometheus exporter on port 8080, by default, that collects Minecraft server metrics during each scrape of `/metrics`.
 
 The sub-command accepts the following arguments, which can also be viewed using `--help`:
+
 ```
   -bedrock-servers host:port
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
@@ -205,12 +230,14 @@ The sub-command accepts the following arguments, which can also be viewed using 
 ```
 
 The following metrics are exported
+
 - `minecraft_status_healthy`
 - `minecraft_status_response_time_seconds`
 - `minecraft_status_players_online_count`
 - `minecraft_status_players_max_count`
 
 with the labels
+
 - `server_host`
 - `server_port`
 - `server_edition` : `java` or `bedrock`
@@ -219,8 +246,6 @@ with the labels
 An example Docker composition is provided in [examples/mc-monitor-prom](examples/mc-monitor-prom), which was used to grab the following screenshot:
 
 ![Prometheus Chart](docs/prometheus_online_count_chart.png)
-
-
 
 ### Monitoring a server with Open Telemetry
 
@@ -237,7 +262,7 @@ The `collect-otel` sub-command accepts the following arguments, which can also b
   -servers host:port
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -bedrock-servers host:port
-    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BED_ROCK_SERVERS)
+    	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
   -interval duration
     	Collect and sends OpenTelemetry data at this interval (env EXPORT_INTERVAL) (default 10s)
 
@@ -248,12 +273,14 @@ The `collect-otel` sub-command accepts the following arguments, which can also b
 ```
 
 The following metrics are exported
+
 - `minecraft_status_healthy`
 - `minecraft_status_response_time_seconds`
 - `minecraft_status_players_online_count`
 - `minecraft_status_players_max_count`
 
 with the labels
+
 - `server_host`
 - `server_port`
 - `server_edition` : `java` or `bedrock`
