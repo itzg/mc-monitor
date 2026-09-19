@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/subcommands"
 	"github.com/itzg/zapconfigs"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,6 +42,10 @@ func TestExportPrometheusProxyEnvironment(t *testing.T) {
 }
 
 func TestExportPrometheusExitsOnContextCancel(t *testing.T) {
+	defaultRegisterer := prometheus.DefaultRegisterer
+	prometheus.DefaultRegisterer = prometheus.NewRegistry()
+	t.Cleanup(func() { prometheus.DefaultRegisterer = defaultRegisterer })
+
 	cmd := &exportPrometheusCmd{}
 	flags := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
 	cmd.SetFlags(flags)
@@ -61,7 +66,6 @@ func TestExportPrometheusExitsOnContextCancel(t *testing.T) {
 	case status := <-done:
 		require.Equal(t, subcommands.ExitSuccess, status)
 	case <-time.After(2 * time.Second):
-		t.Fatal("Execute did not return after context cancellation -- SIGTERM would hang indefinitely")
+		t.Fatal("Execute did not return after its context was cancelled")
 	}
 }
-

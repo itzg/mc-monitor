@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
@@ -9,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -77,30 +79,19 @@ func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args
 
 	mux := http.NewServeMux()
 	mux.Handle(promExportPath, promhttp.Handler())
-	server := &http.Server{Addr: exportAddress, Handler: mux}
-
-	serveErr := make(chan error, 1)
-	go func() {
-		serveErr <- server.ListenAndServe()
-	}()
-
-	select {
-	case <-ctx.Done():
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			logger.Error("failed to cleanly shut down metrics server", zap.Error(err))
-			return subcommands.ExitFailure
-		}
-
-		return subcommands.ExitSuccess
-
-	case err := <-serveErr:
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
-		}
-
-		return subcommands.ExitSuccess
+	server := &http.Server{
+		Addr:        exportAddress,
+		Handler:     mux,
+		BaseContext: func(net.Listener) context.Context { return ctx },
 	}
+
+	context.AfterFunc(ctx, func() {
+		_ = server.Shutdown(ctx)
+	})
+
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		log.Fatal(err)
+	}
+
+	return subcommands.ExitSuccess
 }
