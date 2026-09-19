@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"github.com/google/subcommands"
 	"github.com/itzg/go-flagsfiller"
@@ -9,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -46,7 +48,7 @@ func (c *exportPrometheusCmd) SetFlags(f *flag.FlagSet) {
 	}
 }
 
-func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
+func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
 	if (len(c.Servers) + len(c.BedrockServers)) == 0 {
 		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
@@ -75,9 +77,21 @@ func (c *exportPrometheusCmd) Execute(_ context.Context, _ *flag.FlagSet, args .
 		zap.String("path", promExportPath),
 	)
 
-	http.Handle(promExportPath, promhttp.Handler())
-	log.Fatal(http.ListenAndServe(exportAddress, nil))
+	mux := http.NewServeMux()
+	mux.Handle(promExportPath, promhttp.Handler())
+	server := &http.Server{
+		Addr:        exportAddress,
+		Handler:     mux,
+		BaseContext: func(net.Listener) context.Context { return ctx },
+	}
 
-	// never actually returns from ListenAndServe, so just satisfy return value
-	return subcommands.ExitFailure
+	context.AfterFunc(ctx, func() {
+		_ = server.Shutdown(ctx)
+	})
+
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		log.Fatal(err)
+	}
+
+	return subcommands.ExitSuccess
 }
