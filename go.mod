@@ -10,7 +10,7 @@ require (
 	github.com/itzg/line-protocol-sender v0.1.1
 	github.com/itzg/zapconfigs v0.1.0
 	github.com/prometheus/client_golang v1.24.1
-	github.com/sandertv/go-raknet v1.15.1
+	github.com/sandertv/go-raknet v1.15.2
 	github.com/stretchr/testify v1.12.1
 	github.com/xrjr/mcutils v1.6.1
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.71.0
