@@ -13,7 +13,7 @@ require (
 	github.com/sandertv/go-raknet v1.15.2
 	github.com/stretchr/testify v1.12.1
 	github.com/xrjr/mcutils v1.6.1
-	go.opentelemetry.io/contrib/instrumentation/runtime v0.71.0
+	go.opentelemetry.io/contrib/instrumentation/runtime v0.72.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.47.0
 	go.opentelemetry.io/otel/metric v1.47.0
