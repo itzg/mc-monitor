@@ -1,6 +1,6 @@
 module github.com/itzg/mc-monitor
 
-go 1.26.6
+go 1.26.9
 
 require (
 	github.com/Raqbit/mc-pinger v0.2.4

@@ -7,12 +7,10 @@
   "packageRules": [
     {
       "matchManagers": ["gomod"],
-      "addLabels": ["go"]
-    },
-    {
-      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
       "matchDepTypes": ["golang"],
-      "enabled": true
+      "rangeStrategy": "bump",
+      "addLabels": ["go"]
     }
   ]
 }
