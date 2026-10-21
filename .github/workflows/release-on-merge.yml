@@ -19,7 +19,7 @@ jobs:
         with:
           # Be sure to allocate and assign a Personal Access Token with write access to the repository.
           # Required when the creation of the release will need to trigger another Github workflow.
-          token: ${{ secrets.GH_RELEASE_TOKEN }}
+          token: ${{ secrets.PUSH_GITHUB_TOKEN }}
 
       - name: Display Release Output
         if: steps.release-on-merge.outputs.release-version != ''
