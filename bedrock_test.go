@@ -56,6 +56,7 @@ func TestStatusBedrockCmd_Execute_Nethernet(t *testing.T) {
 		Host:     host,
 		Port:     port,
 		Protocol: "nethernet",
+		NethernetMode: "http",
 	}
 
 	oldStdout := os.Stdout
@@ -91,6 +92,7 @@ func TestStatusBedrockCmd_Execute_Auto(t *testing.T) {
 		Host:     host,
 		Port:     port,
 		Protocol: "auto",
+		NethernetMode: "http",
 	}
 
 	oldStdout := os.Stdout

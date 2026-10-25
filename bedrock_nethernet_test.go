@@ -23,7 +23,7 @@ func TestPingBedrockNetherNet_Success(t *testing.T) {
 	defer ts.Close()
 
 	logger := zap.NewNop()
-	info, err := PingBedrockNetherNet(ts.URL, 5*time.Second, logger)
+	info, err := PingBedrockNetherNetUrl(ts.URL + "/v1/join", 5*time.Second, logger)
 	require.NoError(t, err)
 	require.NotNil(t, info)
 
@@ -73,7 +73,7 @@ func TestPingBedrockNetherNet_Variants(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			info, err := PingBedrockNetherNet(ts.URL, 5*time.Second, zap.NewNop())
+			info, err := PingBedrockNetherNetUrl(ts.URL + "/v1/join", 5*time.Second, zap.NewNop())
 			require.NoError(t, err)
 			assert.Equal(t, tt.expectedMode, info.GameMode)
 			assert.Equal(t, tt.expectedProt, info.ProtocolVersion)
@@ -87,7 +87,7 @@ func TestPingBedrockNetherNet_HTTPError(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	info, err := PingBedrockNetherNet(ts.URL, 5*time.Second, zap.NewNop())
+	info, err := PingBedrockNetherNetUrl(ts.URL + "/v1/join", 5*time.Second, zap.NewNop())
 	require.Error(t, err)
 	assert.Nil(t, info)
 	assert.Contains(t, err.Error(), "status 404")
@@ -100,7 +100,7 @@ func TestPingBedrockNetherNet_InvalidJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	info, err := PingBedrockNetherNet(ts.URL, 5*time.Second, zap.NewNop())
+	info, err := PingBedrockNetherNetUrl(ts.URL + "/v1/join", 5*time.Second, zap.NewNop())
 	require.Error(t, err)
 	assert.Nil(t, info)
 	assert.Contains(t, err.Error(), "Failed to decode response")
