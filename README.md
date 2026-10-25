@@ -76,6 +76,8 @@ mc-monitor status --help
     	 (default 19132)
   -protocol string
     	protocol to use: auto, nethernet, or raknet (default "auto")
+  -nethernet-mode string
+    	nethernet mode to use: auto, http, or https (default "auto")
   -retry-interval duration
     	if retry-limit is non-zero, status will be retried at this interval (default 10s)
   -retry-limit int
