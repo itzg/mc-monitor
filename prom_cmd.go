@@ -19,13 +19,14 @@ import (
 const promExportPath = "/metrics"
 
 type exportPrometheusCmd struct {
-	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
-	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
-	Port           int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
-	Timeout        time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
-	UseProxy       bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
-	ProxyVersion   uint          `usage:"version of PROXY protocol to use" default:"1"`
-	logger         *zap.Logger
+	Servers         []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
+	BedrockServers  []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
+	BedrockProtocol string        `usage:"protocol to use for Bedrock servers: auto, nethernet, or raknet" default:"auto"`
+	Port            int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	Timeout         time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
+	UseProxy        bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
+	ProxyVersion    uint          `usage:"version of PROXY protocol to use" default:"1"`
+	logger          *zap.Logger
 }
 
 func (c *exportPrometheusCmd) Name() string {
@@ -56,7 +57,13 @@ func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args
 
 	logger := args[0].(*zap.Logger)
 
-	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, c.UseProxy, c.ProxyVersion, logger)
+	bedrockProtocol, err := normalizeBedrockProtocol(c.BedrockProtocol)
+	if err != nil {
+		printUsageError(err.Error())
+		return subcommands.ExitUsageError
+	}
+
+	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, bedrockProtocol, c.UseProxy, c.ProxyVersion, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
