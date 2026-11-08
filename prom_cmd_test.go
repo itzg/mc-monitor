@@ -27,6 +27,29 @@ func TestExportPrometheusProxyFlags(t *testing.T) {
 	require.True(t, cmd.UseProxy)
 	require.Equal(t, uint(2), cmd.ProxyVersion)
 	require.Equal(t, time.Minute, cmd.Timeout)
+	require.Equal(t, BedrockProtocolAuto, cmd.BedrockProtocol)
+}
+
+func TestExportPrometheusBedrockProtocol(t *testing.T) {
+	t.Setenv("EXPORT_BEDROCK_PROTOCOL", "nethernet")
+
+	cmd := &exportPrometheusCmd{}
+	flags := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
+	cmd.SetFlags(flags)
+	require.Equal(t, BedrockProtocolNetherNet, cmd.BedrockProtocol)
+
+	require.NoError(t, flags.Parse([]string{"-bedrock-protocol", "raknet"}))
+	require.Equal(t, BedrockProtocolRakNet, cmd.BedrockProtocol)
+}
+
+func TestExportPrometheusRejectsUnknownBedrockProtocol(t *testing.T) {
+	cmd := &exportPrometheusCmd{}
+	flags := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
+	cmd.SetFlags(flags)
+	require.NoError(t, flags.Parse([]string{"-bedrock-servers", "localhost", "-bedrock-protocol", "udp"}))
+
+	status := cmd.Execute(context.Background(), flags, zapconfigs.NewDefaultLogger())
+	require.Equal(t, subcommands.ExitUsageError, status)
 }
 
 func TestExportPrometheusProxyEnvironment(t *testing.T) {

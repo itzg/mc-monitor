@@ -12,7 +12,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -53,24 +52,14 @@ func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...i
 		c.RetryInterval = 1 * time.Second
 	}
 
+	protocol, err := normalizeBedrockProtocol(c.Protocol)
+	if err != nil {
+		logger.Fatal("Unknown protocol", zap.String("protocol", c.Protocol))
+		return subcommands.ExitUsageError
+	}
+
 	for {
-		var info *BedrockServerInfo
-		var err error
-		switch strings.ToLower(c.Protocol) {
-		case "nethernet":
-			info, err = PingBedrockNetherNet(address, 0, logger)
-		case "raknet":
-			info, err = PingBedrockServer(address, 0, logger)
-		case "auto", "":
-			info, err = PingBedrockNetherNet(address, 3*time.Second, logger)
-			if err != nil {
-				logger.Debug("NetherNet probe failed, falling back to RakNet", zap.Error(err))
-				info, err = PingBedrockServer(address, 0, logger)
-			}
-		default:
-			logger.Fatal("Unknown protocol", zap.String("protocol", c.Protocol))
-			return subcommands.ExitUsageError
-		}
+		info, err := PingBedrock(address, protocol, 0, logger)
 
 		if err != nil {
 			if c.RetryLimit > 0 {

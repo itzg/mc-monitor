@@ -95,6 +95,8 @@ Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP proto
 ### export-for-prometheus
 
 ```
+  -bedrock-protocol string
+    	protocol to use for Bedrock servers: auto, nethernet, or raknet (env EXPORT_BEDROCK_PROTOCOL) (default "auto")
   -bedrock-servers host:port
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
   -port int
@@ -108,6 +110,8 @@ Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP proto
   -use-proxy
         supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
 ```
+
+The Bedrock protocol is selected as described for [status-bedrock](#status-bedrock). In `auto` mode, each scrape tries NetherNet first and falls back to RakNet.
 
 ### gather-for-telegraf
 

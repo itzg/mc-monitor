@@ -79,20 +79,20 @@ func (c promCollectors) Collect(metrics chan<- prometheus.Metric) {
 	}
 }
 
-func newPromCollectors(servers []string, bedrockServers []string, useProxy bool, proxyVersion uint, logger *zap.Logger) (promCollectors, error) {
+func newPromCollectors(servers []string, bedrockServers []string, bedrockProtocol string, useProxy bool, proxyVersion uint, logger *zap.Logger) (promCollectors, error) {
 	var collectors []specificPromCollector
 
 	if useProxy && proxyVersion != 1 && proxyVersion != 2 {
 		return nil, fmt.Errorf("proxy version must be 1 or 2")
 	}
 
-	javaCollectors, err := createPromCollectors(servers, JavaEdition, useProxy, byte(proxyVersion), logger)
+	javaCollectors, err := createPromCollectors(servers, JavaEdition, "", useProxy, byte(proxyVersion), logger)
 	if err != nil {
 		return nil, err
 	}
 	collectors = append(collectors, javaCollectors...)
 
-	bedrockCollectors, err := createPromCollectors(bedrockServers, BedrockEdition, false, 0, logger)
+	bedrockCollectors, err := createPromCollectors(bedrockServers, BedrockEdition, bedrockProtocol, false, 0, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func newPromCollectors(servers []string, bedrockServers []string, useProxy bool,
 	return collectors, nil
 }
 
-func createPromCollectors(servers []string, edition ServerEdition, useProxy bool, proxyVersion byte, logger *zap.Logger) (collectors []specificPromCollector, err error) {
+func createPromCollectors(servers []string, edition ServerEdition, bedrockProtocol string, useProxy bool, proxyVersion byte, logger *zap.Logger) (collectors []specificPromCollector, err error) {
 	for _, server := range servers {
 		switch edition {
 
@@ -117,7 +117,7 @@ func createPromCollectors(servers []string, edition ServerEdition, useProxy bool
 			if err != nil {
 				return nil, fmt.Errorf("failed to process server entry '%s': %w", server, err)
 			}
-			collectors = append(collectors, newPromBedrockCollector(host, port, logger))
+			collectors = append(collectors, newPromBedrockCollector(host, port, bedrockProtocol, logger))
 		}
 	}
 	return
@@ -200,10 +200,11 @@ func (c *promJavaCollector) sendMetric(metrics chan<- prometheus.Metric, desc *p
 }
 
 type promBedrockCollector struct {
-	host    string
-	port    uint16
-	logger  *zap.Logger
-	timeout time.Duration
+	host     string
+	port     uint16
+	protocol string
+	logger   *zap.Logger
+	timeout  time.Duration
 }
 
 func (c *promBedrockCollector) GetHost() string {
@@ -222,15 +223,16 @@ func (c *promBedrockCollector) SetTimeout(t time.Duration) {
 	c.timeout = t
 }
 
-func newPromBedrockCollector(host string, port uint16, logger *zap.Logger) *promBedrockCollector {
-	return &promBedrockCollector{host: host, port: port, logger: logger}
+func newPromBedrockCollector(host string, port uint16, protocol string, logger *zap.Logger) *promBedrockCollector {
+	return &promBedrockCollector{host: host, port: port, protocol: protocol, logger: logger}
 }
 
 func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", strconv.Itoa(int(c.port))))
 
-	info, err := PingBedrockServer(net.JoinHostPort(c.host, strconv.Itoa(int(c.port))), c.timeout, c.logger)
+	info, err := PingBedrock(net.JoinHostPort(c.host, strconv.Itoa(int(c.port))), c.protocol, c.timeout, c.logger)
 	if err != nil {
+		c.logger.Debug("failed to ping bedrock server", zap.String("host", c.host), zap.Error(err))
 		c.sendMetric(metrics, promDescHealthy, "", 0)
 	} else {
 		c.sendMetric(metrics, promDescResponseTime, info.Version, info.Rtt.Seconds())
