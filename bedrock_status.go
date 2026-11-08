@@ -21,6 +21,7 @@ type statusBedrockCmd struct {
 	Port int    `default:"19132"`
 
 	Protocol string `usage:"protocol to use: auto, nethernet, or raknet" default:"auto"`
+	NethernetMode string `usage:"nethernet mode to use: auto, http, or https" default:"auto"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
 	RetryLimit    int           `usage:"if non-zero, failed status will be retried this many times before exiting"`
@@ -58,11 +59,11 @@ func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...i
 		var err error
 		switch strings.ToLower(c.Protocol) {
 		case "nethernet":
-			info, err = PingBedrockNetherNet(address, 0, logger)
+			info, err = PingBedrockNetherNet(address, c.NethernetMode, 0, logger)
 		case "raknet":
 			info, err = PingBedrockServer(address, 0, logger)
 		case "auto", "":
-			info, err = PingBedrockNetherNet(address, 3*time.Second, logger)
+			info, err = PingBedrockNetherNet(address, c.NethernetMode, 3*time.Second, logger)
 			if err != nil {
 				logger.Debug("NetherNet probe failed, falling back to RakNet", zap.Error(err))
 				info, err = PingBedrockServer(address, 0, logger)
