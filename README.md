@@ -107,8 +107,12 @@ Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP proto
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -timeout duration
     	timeout when checking each servers (env TIMEOUT) (default 1m0s)
+  -use-old-server-list-ping
+    	indicates older legacy, old server list ping should be used for Java servers, such as b1.8 to 1.3 (env EXPORT_USE_OLD_SERVER_LIST_PING)
   -use-proxy
         supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
+  -use-server-list-ping
+    	indicates the legacy, server list ping should be used for Java servers, such as 1.4 to 1.6 (env EXPORT_USE_SERVER_LIST_PING)
 ```
 
 ### gather-for-telegraf
@@ -227,8 +231,12 @@ The sub-command accepts the following arguments, which can also be viewed using 
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -timeout duration
         timeout when checking each servers (env TIMEOUT) (default 1m0s)
+  -use-old-server-list-ping
+    	indicates older legacy, old server list ping should be used for Java servers, such as b1.8 to 1.3 (env EXPORT_USE_OLD_SERVER_LIST_PING)
   -use-proxy
         supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
+  -use-server-list-ping
+    	indicates the legacy, server list ping should be used for Java servers, such as 1.4 to 1.6 (env EXPORT_USE_SERVER_LIST_PING)
 ```
 
 The following metrics are exported
@@ -244,6 +252,8 @@ with the labels
 - `server_port`
 - `server_edition` : `java` or `bedrock`
 - `server_version`
+
+Java servers older than 1.7 don't support the status protocol used by default, so they are reported as unhealthy and log a protocol error for each scrape. For those, pass `--use-server-list-ping` for versions 1.4 to 1.6 or `--use-old-server-list-ping` for versions b1.8 to 1.3. The chosen ping is used for all of the given Java servers; however, newer servers also respond to the legacy pings. The `server_version` label is empty with `--use-old-server-list-ping` since that response doesn't include the version. The response time includes waiting for the server to close the connection, which those old servers delay by a couple of seconds. Neither option can be combined with `--use-proxy`.
 
 An example Docker composition is provided in [examples/mc-monitor-prom](examples/mc-monitor-prom), which was used to grab the following screenshot:
 

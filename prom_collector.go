@@ -7,6 +7,7 @@ import (
 	"time"
 
 	mcpinger "github.com/Raqbit/mc-pinger"
+	"github.com/itzg/mc-monitor/slp"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 )
@@ -57,6 +58,42 @@ func pingJavaServer(opt pingOptions) (*mcpinger.ServerInfo, error) {
 	opts := javaPingerOptions(opt)
 	pinger := mcpinger.New(opt.GetHost(), opt.GetPort(), opts...)
 	return pinger.Ping()
+}
+
+// pingJavaServerList uses the legacy server list ping of 1.4 to 1.6
+func pingJavaServerList(opt pingOptions) (*mcpinger.ServerInfo, error) {
+	response, err := slp.ServerListPing(opt.GetHost(), int(opt.GetPort()), opt.GetTimeout())
+	if err != nil {
+		return nil, err
+	}
+	return legacyServerInfo(response.ServerVersion, response.CurrentPlayerCount, response.MaxPlayers)
+}
+
+// pingJavaOldServerList uses the old server list ping of b1.8 to 1.3, which doesn't report the server version
+func pingJavaOldServerList(opt pingOptions) (*mcpinger.ServerInfo, error) {
+	response, err := slp.OldServerListPing(opt.GetHost(), int(opt.GetPort()), opt.GetTimeout())
+	if err != nil {
+		return nil, err
+	}
+	return legacyServerInfo("", response.CurrentPlayerCount, response.MaxPlayers)
+}
+
+// legacyServerInfo maps the fields of a legacy server list response onto the ones used from a status response
+func legacyServerInfo(version string, playersOnline string, playersMax string) (*mcpinger.ServerInfo, error) {
+	online, err := strconv.ParseInt(playersOnline, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("invalid online player count: %w", err)
+	}
+	maxPlayers, err := strconv.ParseInt(playersMax, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("invalid max player count: %w", err)
+	}
+
+	var info mcpinger.ServerInfo
+	info.Version.Name = version
+	info.Players.Online = int32(online)
+	info.Players.Max = int32(maxPlayers)
+	return &info, nil
 }
 
 type specificPromCollector interface {
@@ -123,6 +160,29 @@ func createPromCollectors(servers []string, edition ServerEdition, useProxy bool
 	return
 }
 
+// useLegacyPing switches the Java collectors from the status protocol to one of the legacy server list pings
+func (c promCollectors) useLegacyPing(useServerListPing bool, useOldServerListPing bool) error {
+	if !useServerListPing && !useOldServerListPing {
+		return nil
+	}
+	if useServerListPing && useOldServerListPing {
+		return fmt.Errorf("only one of server list ping or old server list ping can be used")
+	}
+
+	for _, entry := range c {
+		javaCollector, ok := entry.(*promJavaCollector)
+		if !ok {
+			continue
+		}
+		if javaCollector.useProxy {
+			return fmt.Errorf("proxy protocol is not supported with server list ping")
+		}
+		javaCollector.useServerListPing = useServerListPing
+		javaCollector.useOldServerListPing = useOldServerListPing
+	}
+	return nil
+}
+
 func newPromJavaCollector(host string, port uint16, useProxy bool, proxyVersion byte, logger *zap.Logger) specificPromCollector {
 	return &promJavaCollector{
 		host:         host,
@@ -140,6 +200,9 @@ type promJavaCollector struct {
 	timeout      time.Duration
 	useProxy     bool
 	proxyVersion byte
+
+	useServerListPing    bool
+	useOldServerListPing bool
 }
 
 func (c *promJavaCollector) GetHost() string {
@@ -169,7 +232,7 @@ func (c *promJavaCollector) SetTimeout(t time.Duration) {
 func (c *promJavaCollector) Collect(metrics chan<- prometheus.Metric) {
 	c.logger.Debug("pinging", zap.String("host", c.host), zap.String("port", strconv.Itoa(int(c.port))))
 	startTime := time.Now()
-	info, err := pingJavaServer(c)
+	info, err := c.ping()
 	elapsed := time.Now().Sub(startTime)
 
 	if err != nil {
@@ -184,6 +247,17 @@ func (c *promJavaCollector) Collect(metrics chan<- prometheus.Metric) {
 			c.sendMetric(metrics, promDescPlayersMax, info.Version.Name, float64(info.Players.Max))
 		}
 
+	}
+}
+
+func (c *promJavaCollector) ping() (*mcpinger.ServerInfo, error) {
+	switch {
+	case c.useServerListPing:
+		return pingJavaServerList(c)
+	case c.useOldServerListPing:
+		return pingJavaOldServerList(c)
+	default:
+		return pingJavaServer(c)
 	}
 }
 

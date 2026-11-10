@@ -25,7 +25,11 @@ type exportPrometheusCmd struct {
 	Timeout        time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
 	UseProxy       bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
 	ProxyVersion   uint          `usage:"version of PROXY protocol to use" default:"1"`
-	logger         *zap.Logger
+
+	UseServerListPing    bool `usage:"indicates the legacy, server list ping should be used for Java servers, such as 1.4 to 1.6"`
+	UseOldServerListPing bool `usage:"indicates older legacy, old server list ping should be used for Java servers, such as b1.8 to 1.3"`
+
+	logger *zap.Logger
 }
 
 func (c *exportPrometheusCmd) Name() string {
@@ -63,6 +67,11 @@ func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args
 
 	for i := range collectors {
 		collectors[i].SetTimeout(c.Timeout)
+	}
+
+	err = collectors.useLegacyPing(c.UseServerListPing, c.UseOldServerListPing)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	err = prometheus.Register(collectors)
