@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/sandertv/go-raknet"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sandertv/go-raknet"
 )
 
 type BedrockServerInfo struct {
@@ -36,13 +37,19 @@ func PingBedrockServer(address string) (*BedrockServerInfo, error) {
 		Version:         parts[3],
 		Players:         safeParseInt(parts[4]),
 		MaxPlayers:      safeParseInt(parts[5]),
-	}
-	if len(parts) > 7 {
-		info.LevelName = parts[7]
-		info.GameMode = parts[8]
+		LevelName:       safeGet(parts, 7),
+		GameMode:        safeGet(parts, 8),
+		Difficulty:      safeGet(parts, 9),
 	}
 
 	return info, nil
+}
+
+func safeGet(parts []string, i int) string {
+	if i < len(parts) {
+		return parts[i]
+	}
+	return ""
 }
 
 func safeParseInt(s string) int {
