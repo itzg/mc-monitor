@@ -92,5 +92,6 @@ brews:
       owner: itzg
       name: homebrew-tap
       token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
+    directory: Formula
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
