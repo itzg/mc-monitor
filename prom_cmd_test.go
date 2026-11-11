@@ -41,6 +41,33 @@ func TestExportPrometheusProxyEnvironment(t *testing.T) {
 	require.Equal(t, uint(2), cmd.ProxyVersion)
 }
 
+func TestExportPrometheusServerListPingFlags(t *testing.T) {
+	cmd := &exportPrometheusCmd{}
+	flags := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
+	cmd.SetFlags(flags)
+
+	require.False(t, cmd.UseServerListPing)
+	require.False(t, cmd.UseOldServerListPing)
+
+	err := flags.Parse([]string{"-servers", "localhost", "-use-server-list-ping", "-use-old-server-list-ping"})
+
+	require.NoError(t, err)
+	require.True(t, cmd.UseServerListPing)
+	require.True(t, cmd.UseOldServerListPing)
+}
+
+func TestExportPrometheusServerListPingEnvironment(t *testing.T) {
+	t.Setenv("EXPORT_USE_SERVER_LIST_PING", "true")
+	t.Setenv("EXPORT_USE_OLD_SERVER_LIST_PING", "true")
+
+	cmd := &exportPrometheusCmd{}
+	flags := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
+	cmd.SetFlags(flags)
+
+	require.True(t, cmd.UseServerListPing)
+	require.True(t, cmd.UseOldServerListPing)
+}
+
 func TestExportPrometheusExitsOnContextCancel(t *testing.T) {
 	defaultRegisterer := prometheus.DefaultRegisterer
 	prometheus.DefaultRegisterer = prometheus.NewRegistry()
