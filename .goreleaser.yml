@@ -87,11 +87,12 @@ scoops:
     directory: bucket
     license: MIT
     description: Command/agent to monitor the status of Minecraft servers
-brews:
+homebrew_casks:
   - repository:
       owner: itzg
       name: homebrew-tap
       token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
-    directory: Formula
-    license: MIT
+    directory: Casks
+    binaries:
+      - mc-monitor
     description: Command/agent to monitor the status of Minecraft servers
