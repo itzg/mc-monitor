@@ -12,7 +12,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -20,7 +19,7 @@ type statusBedrockCmd struct {
 	Host string `default:"localhost"`
 	Port int    `default:"19132"`
 
-	Protocol string `usage:"protocol to use: auto, nethernet, or raknet" default:"auto"`
+	Protocol      string `usage:"protocol to use: auto, nethernet, or raknet" default:"auto"`
 	NethernetMode string `usage:"nethernet mode to use: auto, http, or https" default:"auto"`
 
 	RetryInterval time.Duration `usage:"if retry-limit is non-zero, status will be retried at this interval" default:"10s"`
@@ -55,24 +54,7 @@ func (c *statusBedrockCmd) Execute(_ context.Context, _ *flag.FlagSet, args ...i
 	}
 
 	for {
-		var info *BedrockServerInfo
-		var err error
-		switch strings.ToLower(c.Protocol) {
-		case "nethernet":
-			info, err = PingBedrockNetherNet(address, c.NethernetMode, 0, logger)
-		case "raknet":
-			info, err = PingBedrockServer(address, 0, logger)
-		case "auto", "":
-			info, err = PingBedrockNetherNet(address, c.NethernetMode, 3*time.Second, logger)
-			if err != nil {
-				logger.Debug("NetherNet probe failed, falling back to RakNet", zap.Error(err))
-				info, err = PingBedrockServer(address, 0, logger)
-			}
-		default:
-			logger.Fatal("Unknown protocol", zap.String("protocol", c.Protocol))
-			return subcommands.ExitUsageError
-		}
-
+		info, err := PingBedrockServer(address, c.NethernetMode, c.Protocol, 3*time.Second, logger)
 		if err != nil {
 			if c.RetryLimit > 0 {
 				c.RetryLimit--

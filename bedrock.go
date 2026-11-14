@@ -23,7 +23,26 @@ type BedrockServerInfo struct {
 	Rtt             time.Duration
 }
 
-func PingBedrockServer(address string, timeout time.Duration, logger *zap.Logger) (*BedrockServerInfo, error) {
+func PingBedrockServer(address string, nethernetMode string, protocol string, timeout time.Duration, logger *zap.Logger) (*BedrockServerInfo, error) {
+	switch strings.ToLower(protocol) {
+	case "nethernet":
+		return PingBedrockNetherNet(address, nethernetMode, timeout, logger)
+	case "raknet":
+		return PingBedrockRaknetServer(address, timeout, logger)
+	case "auto", "":
+		info, err := PingBedrockNetherNet(address, nethernetMode, 3*time.Second, logger)
+		if err != nil {
+			logger.Debug("NetherNet probe failed, falling back to RakNet", zap.Error(err))
+			return PingBedrockRaknetServer(address, timeout, logger)
+		}
+		return info, nil
+	default:
+		logger.Fatal("Unknown protocol", zap.String("protocol", protocol))
+		return nil, fmt.Errorf("unknown protocol: %s", protocol)
+	}
+}
+
+func PingBedrockRaknetServer(address string, timeout time.Duration, logger *zap.Logger) (*BedrockServerInfo, error) {
 	start := time.Now()
 	var response []byte
 	var err error

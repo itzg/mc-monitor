@@ -97,12 +97,18 @@ Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP proto
 ### export-for-prometheus
 
 ```
+  -bedrock-nethernet-mode string
+    	nethernet mode to use: auto, http, or https (env EXPORT_BEDROCK_NETHERNET_MODE) (default "auto")
+  -bedrock-protocol string
+    	protocol to use: auto, nethernet, or raknet (env EXPORT_BEDROCK_PROTOCOL) (default "auto")
   -bedrock-servers host:port
     	one or more host:port addresses of Bedrock servers to monitor, when port is omitted 19132 is used (env EXPORT_BEDROCK_SERVERS)
+  -java-servers host:port
+    	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -port int
     	HTTP port where Prometheus metrics are exported (env EXPORT_PORT) (default 8080)
   -proxy-version uint
-        version of PROXY protocol to use (env EXPORT_PROXY_VERSION) (default 1)
+    	version of PROXY protocol to use (env EXPORT_PROXY_VERSION) (default 1)
   -servers host:port
     	one or more host:port addresses of Java servers to monitor, when port is omitted 25565 is used (env EXPORT_SERVERS)
   -timeout duration
@@ -110,7 +116,7 @@ Bedrock Dedicated Server (BDS) is transitioning from the legacy RakNet UDP proto
   -use-old-server-list-ping
     	indicates older legacy, old server list ping should be used for Java servers, such as b1.8 to 1.3 (env EXPORT_USE_OLD_SERVER_LIST_PING)
   -use-proxy
-        supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
+    	supports contacting servers when proxy_protocol is enabled (env EXPORT_USE_PROXY)
   -use-server-list-ping
     	indicates the legacy, server list ping should be used for Java servers, such as 1.4 to 1.6 (env EXPORT_USE_SERVER_LIST_PING)
 ```
@@ -263,8 +269,7 @@ An example Docker composition is provided in [examples/mc-monitor-prom](examples
 
 Open Telemetry is a vendor-agnostic way to receive, process and export telemetry data. In this context, monitoring a Minecraft Server with Open Telemetry requires a running [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to receive the exported data. An example on how to initialize it can be found in [examples/mc-monitor-otel](examples/mc-monitor-otel).
 
-Once you run the mc-monitor application using the `collect-otel` subcommand, mc-monitor will create the necessary [instrumentation]
-(https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
+Once you run the mc-monitor application using the `collect-otel` subcommand, mc-monitor will create the necessary [instrumentation](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to export the metrics to the collector through the gRPC protocol.
 
 The Collector will receive and process the data, sending the metrics to any of the supported [backends](https://opentelemetry.io/docs/collector/configuration/#exporters). In our example, you will find the necessary configurations to export metrics through Prometheus.
 
