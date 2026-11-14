@@ -4,32 +4,39 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"github.com/google/subcommands"
-	"github.com/itzg/go-flagsfiller"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/google/subcommands"
+	"github.com/itzg/go-flagsfiller"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
 )
 
 const promExportPath = "/metrics"
 
 type exportPrometheusCmd struct {
-	Servers        []string      `usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
-	BedrockServers []string      `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
-	Port           int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
-	Timeout        time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
-	UseProxy       bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
-	ProxyVersion   uint          `usage:"version of PROXY protocol to use" default:"1"`
+	Servers      []string `aliases:"java-servers" usage:"one or more [host:port] addresses of Java servers to monitor, when port is omitted 25565 is used"`
+	Bedrock      BedrockOptions
+	Port         int           `usage:"HTTP port where Prometheus metrics are exported" default:"8080"`
+	Timeout      time.Duration `usage:"timeout when checking each servers" default:"60s" env:"TIMEOUT"`
+	UseProxy     bool          `usage:"supports contacting servers when proxy_protocol is enabled"`
+	ProxyVersion uint          `usage:"version of PROXY protocol to use" default:"1"`
 
 	UseServerListPing    bool `usage:"indicates the legacy, server list ping should be used for Java servers, such as 1.4 to 1.6"`
 	UseOldServerListPing bool `usage:"indicates older legacy, old server list ping should be used for Java servers, such as b1.8 to 1.3"`
 
 	logger *zap.Logger
+}
+
+type BedrockOptions struct {
+	Servers       []string `usage:"one or more [host:port] addresses of Bedrock servers to monitor, when port is omitted 19132 is used"`
+	Protocol      string   `usage:"protocol to use: auto, nethernet, or raknet" default:"auto"`
+	NethernetMode string   `usage:"nethernet mode to use: auto, http, or https" default:"auto"`
 }
 
 func (c *exportPrometheusCmd) Name() string {
@@ -53,14 +60,18 @@ func (c *exportPrometheusCmd) SetFlags(f *flag.FlagSet) {
 }
 
 func (c *exportPrometheusCmd) Execute(ctx context.Context, _ *flag.FlagSet, args ...interface{}) subcommands.ExitStatus {
-	if (len(c.Servers) + len(c.BedrockServers)) == 0 {
+	if (len(c.Servers) + len(c.Bedrock.Servers)) == 0 {
 		printUsageError("requires at least one server")
 		return subcommands.ExitUsageError
 	}
 
 	logger := args[0].(*zap.Logger)
 
-	collectors, err := newPromCollectors(c.Servers, c.BedrockServers, c.UseProxy, c.ProxyVersion, logger)
+	collectors, err := newPromCollectors(c.Servers, BedrockOptions{
+		Servers:       c.Bedrock.Servers,
+		Protocol:      c.Bedrock.Protocol,
+		NethernetMode: c.Bedrock.NethernetMode,
+	}, c.UseProxy, c.ProxyVersion, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
