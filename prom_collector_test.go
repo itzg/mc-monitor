@@ -51,7 +51,9 @@ func TestJavaPingerOptions(t *testing.T) {
 func TestNewPromCollectorsPropagatesProxyConfig(t *testing.T) {
 	collectors, err := newPromCollectors(
 		[]string{"java.example.com"},
-		[]string{"bedrock.example.com"},
+		BedrockOptions{
+			Servers: []string{"bedrock.example.com"},
+		},
 		true,
 		2,
 		zap.NewNop(),
@@ -70,7 +72,9 @@ func TestNewPromCollectorsPropagatesProxyConfig(t *testing.T) {
 }
 
 func TestNewPromCollectorsRejectsInvalidProxyVersion(t *testing.T) {
-	_, err := newPromCollectors([]string{"java.example.com"}, nil, true, 3, zap.NewNop())
+	_, err := newPromCollectors([]string{"java.example.com"}, BedrockOptions{
+		Servers: []string{"bedrock.example.com"},
+	}, true, 3, zap.NewNop())
 
 	require.EqualError(t, err, "proxy version must be 1 or 2")
 }
