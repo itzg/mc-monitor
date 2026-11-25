@@ -105,3 +105,29 @@ func TestPingBedrockNetherNet_InvalidJSON(t *testing.T) {
 	assert.Nil(t, info)
 	assert.Contains(t, err.Error(), "Failed to decode response")
 }
+
+func TestPingBedrockNetherNet_EmptyBody(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer ts.Close()
+
+	info, err := PingBedrockNetherNetUrl(ts.URL+"/v1/join", 5*time.Second, zap.NewNop())
+	require.NoError(t, err)
+	require.NotNil(t, info)
+	assert.Equal(t, "", info.Version)
+	assert.Equal(t, -1, info.Players)
+	assert.Equal(t, -1, info.MaxPlayers)
+	assert.True(t, info.Rtt > 0)
+}
+
+func TestPingBedrockNetherNet_TruncatedJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"name":"Hello`))
+	}))
+	defer ts.Close()
+
+	_, err := PingBedrockNetherNetUrl(ts.URL+"/v1/join", 5*time.Second, zap.NewNop())
+	require.Error(t, err)
+}

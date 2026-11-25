@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
@@ -272,4 +274,65 @@ func TestUseLegacyPing(t *testing.T) {
 
 		require.EqualError(t, err, "proxy protocol is not supported with server list ping")
 	})
+}
+
+func TestPromBedrockCollectorNetherNet(t *testing.T) {
+	tests := []struct {
+		name    string
+		body    string
+		version string
+		expect  map[string]float64
+	}{
+		{
+			name:    "with status",
+			body:    `{"version":"1.26.66","players":2,"maxPlayers":10}`,
+			version: "1.26.66",
+			expect: map[string]float64{
+				"minecraft_status_healthy":              1,
+				"minecraft_status_players_online_count": 2,
+				"minecraft_status_players_max_count":    10,
+			},
+		},
+		{
+			// enable-lan-visibility=false
+			name:   "empty body",
+			expect: map[string]float64{"minecraft_status_healthy": 1},
+		},
+		{
+			name:   "invalid body",
+			body:   "not-json",
+			expect: map[string]float64{"minecraft_status_healthy": 0},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte(tt.body))
+			}))
+			defer ts.Close()
+			host, port, err := SplitHostPort(ts.Listener.Addr().String(), DefaultBedrockPort)
+			require.NoError(t, err)
+
+			collectors := promCollectors{newPromBedrockCollector(host, port, "nethernet", "http", zap.NewNop())}
+			registry := prometheus.NewRegistry()
+			require.NoError(t, registry.Register(collectors))
+			families, err := registry.Gather()
+			require.NoError(t, err)
+
+			values := make(map[string]float64)
+			for _, family := range families {
+				metric := family.GetMetric()[0]
+				for _, label := range metric.GetLabel() {
+					if label.GetName() == promLabelVersion {
+						assert.Equal(t, tt.version, label.GetValue())
+					}
+				}
+				if family.GetName() != "minecraft_status_response_time_seconds" {
+					values[family.GetName()] = metric.GetGauge().GetValue()
+				}
+			}
+			assert.Equal(t, tt.expect, values)
+		})
+	}
 }

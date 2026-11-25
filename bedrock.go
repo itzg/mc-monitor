@@ -15,8 +15,8 @@ type BedrockServerInfo struct {
 	ServerName      string
 	ProtocolVersion string
 	Version         string
-	Players         int
-	MaxPlayers      int
+	Players         int // -1 when not known
+	MaxPlayers      int // -1 when not known
 	LevelName       string
 	GameMode        string
 	Difficulty      string
