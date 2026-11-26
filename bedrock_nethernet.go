@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -66,7 +68,17 @@ func PingBedrockNetherNetUrl(url string, timeout time.Duration, logger *zap.Logg
 	}
 
 	var data netherNetResponse
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if errors.Is(err, io.EOF) {
+		// a server with enable-lan-visibility=false responds with an empty body
+		logger.Debug("Received empty response from bedrock server using NetherNet", zap.String("url", url))
+		return &BedrockServerInfo{
+			Rtt:        rtt,
+			Players:    -1,
+			MaxPlayers: -1,
+		}, nil
+	}
+	if err != nil {
 		return nil, fmt.Errorf("Failed to decode response from bedrock server %s: %w", url, err)
 	}
 

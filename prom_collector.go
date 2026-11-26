@@ -318,8 +318,12 @@ func (c *promBedrockCollector) Collect(metrics chan<- prometheus.Metric) {
 	} else {
 		c.sendMetric(metrics, promDescResponseTime, info.Version, info.Rtt.Seconds())
 		c.sendMetric(metrics, promDescHealthy, info.Version, 1)
-		c.sendMetric(metrics, promDescPlayersOnline, info.Version, float64(info.Players))
-		c.sendMetric(metrics, promDescPlayersMax, info.Version, float64(info.MaxPlayers))
+		if info.Players >= 0 {
+			c.sendMetric(metrics, promDescPlayersOnline, info.Version, float64(info.Players))
+		}
+		if info.MaxPlayers >= 0 {
+			c.sendMetric(metrics, promDescPlayersMax, info.Version, float64(info.MaxPlayers))
+		}
 	}
 }
 
